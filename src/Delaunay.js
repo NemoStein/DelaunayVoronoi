@@ -207,10 +207,8 @@ export default class Delaunay
 			y2: this.points[0].y,
 		}
 
-		for (const i in this.points)
+		for (const point of this.points)
 		{
-			const point = this.points[i]
-
 			box.x1 = (box.x1 > point.x ? point.x : box.x1)
 			box.x2 = (box.x2 < point.x ? point.x : box.x2)
 			box.y1 = (box.y1 > point.y ? point.y : box.y1)
