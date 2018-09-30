@@ -4,6 +4,9 @@ import Cell from './Cell.js'
 
 export default class Delaunay
 {
+	/**
+	 * @param {{x:Number, y:Number}[]} points 
+	 */
 	constructor(points)
 	{
 		if (points.length === 0)
@@ -18,7 +21,7 @@ export default class Delaunay
 	triangulate()
 	{
 		Site.id = 0
-		
+
 		const box = this.calculateBoundingBox()
 
 		const a = new Site(box.x + box.w / 2, box.y - box.h)
@@ -57,7 +60,7 @@ export default class Delaunay
 						{
 							return
 						}
-
+						
 						if (neighbour.has(cell.ab))
 						{
 							this.edges.delete(cell.ab)
@@ -161,8 +164,14 @@ export default class Delaunay
 		})
 	}
 
+	/**
+	 * @param {Site} site 
+	 * 
+	 * @returns {Cell[]}
+	 */
 	getAffectedCells(site)
 	{
+		/** @type {Cell[]} */
 		const result = []
 
 		this.cells.forEach(cell =>
