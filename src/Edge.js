@@ -1,5 +1,12 @@
+import Point from './Point.js'
+import Site from './Site.js'
+
 export default class Edge
 {
+	/**
+	 * @param {Site} a One end of the Edge
+	 * @param {Site} b The other end
+	 */
 	constructor(a, b)
 	{
 		this.a = a
@@ -7,16 +14,21 @@ export default class Edge
 
 		this.id = a.id + b.id
 
-		this.length = Math.sqrt(Math.abs((a.x - b.x) * (a.x - b.x)) + Math.abs((a.y - b.y) * (a.y - b.y)))
+		this.length = Point.distance(a, b)
 
-		this.center = {
-			x: (b.x - a.x) / 2 + a.x,
-			y: (b.y - a.y) / 2 + a.y,
-		}
+		this.center = new Point(
+			(b.x - a.x) / 2 + a.x,
+			(b.y - a.y) / 2 + a.y,
+		)
+	}
 
-		this.has = function(site)
-		{
-			return (site == this.a || site == this.b)
-		}
+	/**
+	 * @param {Site} site 
+	 * 
+	 * @returns {Boolean} If this Edge have this point in any of its ends
+	 */
+	has(site)
+	{
+		return (site === this.a || site === this.b)
 	}
 }

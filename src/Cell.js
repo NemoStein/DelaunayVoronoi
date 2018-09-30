@@ -1,5 +1,14 @@
+import Edge from './Edge.js'
+import Point from './Point.js'
+import Site from './Site.js'
+
 export default class Cell
 {
+	/**
+	 * @param {Edge} ab 
+	 * @param {Edge} bc 
+	 * @param {Edge} ca 
+	 */
 	constructor(ab, bc, ca)
 	{
 		this.ab = ab
@@ -18,27 +27,22 @@ export default class Cell
 			c.x * (a.y - b.y)
 		)
 
-		this.circumcenter = {
-			x: (
+		this.circumcenter = new Point(
+			(
 				(a.x * a.x + a.y * a.y) * (b.y - c.y) +
 				(b.x * b.x + b.y * b.y) * (c.y - a.y) +
 				(c.x * c.x + c.y * c.y) * (a.y - b.y)
 			) / d,
-
-			y: -(
+			-(
 				(a.x * a.x + a.y * a.y) * (b.x - c.x) +
 				(b.x * b.x + b.y * b.y) * (c.x - a.x) +
 				(c.x * c.x + c.y * c.y) * (a.x - b.x)
 			) / d,
-		}
+		)
 
-		const distance = function(a, b)
-		{
-			return Math.sqrt(Math.abs((b.x - a.x) * (b.x - a.x)) + Math.abs((b.y - a.y) * (b.y - a.y)))
-		}
-		const dab = distance(a, b)
-		const dbc = distance(b, c)
-		const dca = distance(c, a)
+		const dab = Point.distance(a, b)
+		const dbc = Point.distance(b, c)
+		const dca = Point.distance(c, a)
 
 		this.circumradius = (dab * dbc * dca) / Math.sqrt(
 			(dab + dbc + dca) *
@@ -47,21 +51,26 @@ export default class Cell
 			(dab + dbc - dca)
 		)
 
-		this.centroid = {
-			x: 1 / 3 * (a.x + b.x + c.x),
-			y: 1 / 3 * (a.y + b.y + c.y),
-		}
+		this.centroid = new Point(
+			1 / 3 * (a.x + b.x + c.x),
+			1 / 3 * (a.y + b.y + c.y),
+		)
+	}
 
-		this.has = function(siteOrEdge)
+	/**
+	 * @param {Site | Edge} siteOrEdge 
+	 * 
+	 * @returns {boolean} If this Cell have this Site/Edge as one of its vertices/sides
+	 */
+	has(siteOrEdge)
+	{
+		if (siteOrEdge instanceof Site)
 		{
-			if (siteOrEdge.constructor.name == 'Site')
-			{
-				return (siteOrEdge == this.a || siteOrEdge == this.b || siteOrEdge == this.c)
-			}
-			else if (siteOrEdge.constructor.name == 'Edge')
-			{
-				return (siteOrEdge == this.ab || siteOrEdge == this.bc || siteOrEdge == this.ca)
-			}
+			return (siteOrEdge == this.a || siteOrEdge == this.b || siteOrEdge == this.c)
+		}
+		else if (siteOrEdge instanceof Edge)
+		{
+			return (siteOrEdge == this.ab || siteOrEdge == this.bc || siteOrEdge == this.ca)
 		}
 	}
 }

@@ -2,9 +2,12 @@ import Delaunay from './src/Delaunay.js'
 
 document.addEventListener('DOMContentLoaded', () =>
 {
-	/** @type {HTMLCanvasElement} */
-	// @ts-ignore
 	const canvas = document.getElementById('Canvas')
+	if (!(canvas instanceof HTMLCanvasElement))
+	{
+		return;
+	}
+
 	const context = canvas.getContext('2d')
 
 	canvas.width = document.body.clientWidth
