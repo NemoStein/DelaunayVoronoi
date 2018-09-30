@@ -38,9 +38,9 @@ export default class Delaunay
 		this.edges = new Set([ab, bc, ca])
 		this.cells = new Set([abc])
 
-		for (let i = 0; i < this.points.length; i++)
+		for (const point of this.points)
 		{
-			const site = new Site(this.points[i].x, this.points[i].y)
+			const site = new Site(point.x, point.y)
 			const affectedCells = this.getAffectedCells(site)
 
 			const possibleSharedEdges = new Set()
@@ -48,19 +48,19 @@ export default class Delaunay
 			const sharedSites = new Set()
 			const newEdges = []
 
-			affectedCells.forEach(cell =>
+			for (const cell of affectedCells)
 			{
 				this.cells.delete(cell)
 
 				if (affectedCells.length > 1)
 				{
-					affectedCells.forEach(neighbour =>
+					for (const neighbour of affectedCells)
 					{
 						if (cell === neighbour)
 						{
-							return
+							continue
 						}
-						
+
 						if (neighbour.has(cell.ab))
 						{
 							this.edges.delete(cell.ab)
@@ -87,7 +87,7 @@ export default class Delaunay
 						{
 							possibleSharedEdges.add(cell.ca)
 						}
-					})
+					}
 				}
 				else
 				{
@@ -95,31 +95,31 @@ export default class Delaunay
 					sharedEdges.add(cell.bc)
 					sharedEdges.add(cell.ca)
 				}
-			})
+			}
 
-			possibleSharedEdges.forEach(edge =>
+			for (const edge of possibleSharedEdges)
 			{
 				if (this.edges.has(edge))
 				{
 					sharedEdges.add(edge)
 				}
-			})
+			}
 
-			sharedEdges.forEach(shared =>
+			for (const shared of sharedEdges)
 			{
 				sharedSites.add(shared.a)
 				sharedSites.add(shared.b)
-			})
+			}
 
-			sharedSites.forEach(shared =>
+			for (const shared of sharedSites)
 			{
 				const edge = new Edge(shared, site)
 
 				newEdges.push(edge)
 				this.edges.add(edge)
-			})
+			}
 
-			sharedEdges.forEach(ab =>
+			for (const ab of sharedEdges)
 			{
 				const bc = newEdges.find(edge =>
 				{
@@ -138,8 +138,7 @@ export default class Delaunay
 
 				const cell = new Cell(ab, bc, ca)
 				this.cells.add(cell)
-			})
-
+			}
 
 			this.sites.add(site)
 		}
@@ -147,21 +146,21 @@ export default class Delaunay
 		const removeEdges = new Set()
 		const removeCells = new Set()
 
-		this.edges.forEach(edge =>
+		for (const edge of this.edges)
 		{
 			if (edge.a == a || edge.b == a || edge.a == b || edge.b == b || edge.a == c || edge.b == c)
 			{
 				removeEdges.add(edge)
 
-				this.cells.forEach(cell =>
+				for (const cell of this.cells)
 				{
 					if (cell.ab == edge || cell.bc == edge || cell.ca == edge)
 					{
 						removeCells.add(cell)
 					}
-				})
+				}
 			}
-		})
+		}
 	}
 
 	/**
@@ -174,7 +173,7 @@ export default class Delaunay
 		/** @type {Cell[]} */
 		const result = []
 
-		this.cells.forEach(cell =>
+		for (const cell of this.cells)
 		{
 			const dx = site.x - cell.circumcenter.x
 			const dy = site.y - cell.circumcenter.y
@@ -183,7 +182,7 @@ export default class Delaunay
 			{
 				result.push(cell)
 			}
-		})
+		}
 
 		return result
 	}
