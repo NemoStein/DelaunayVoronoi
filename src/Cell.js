@@ -1,8 +1,8 @@
-import Edge from './Edge.js'
-import Point from './Point.js'
-import Site from './Site.js'
+import { Edge } from './Edge.js'
+import { Point } from './Point.js'
+import { Site } from './Site.js'
 
-export default class Cell {
+export class Cell {
   /**
    * @param {Edge} ab
    * @param {Edge} bc
@@ -14,10 +14,8 @@ export default class Cell {
     this.ca = ca
 
     const a = this.a = ab.a
-    const b = this.b = (a == bc.a ? bc.b : bc.a)
-    const c = this.c = (b == ca.a ? ca.b : ca.a)
-
-    this.id = a.id + b.id + c.id
+    const b = this.b = (a === bc.a ? bc.b : bc.a)
+    const c = this.c = (b === ca.a ? ca.b : ca.a)
 
     const d = 2 * (
       a.x * (b.y - c.y) +
@@ -62,9 +60,11 @@ export default class Cell {
    */
   has (siteOrEdge) {
     if (siteOrEdge instanceof Site) {
-      return (siteOrEdge == this.a || siteOrEdge == this.b || siteOrEdge == this.c)
+      return (siteOrEdge === this.a || siteOrEdge === this.b || siteOrEdge === this.c)
     } else if (siteOrEdge instanceof Edge) {
-      return (siteOrEdge == this.ab || siteOrEdge == this.bc || siteOrEdge == this.ca)
+      return (siteOrEdge === this.ab || siteOrEdge === this.bc || siteOrEdge === this.ca)
     }
+
+    throw new Error('Expected "siteOrEdge" to be of type Site or Edge')
   }
 }

@@ -1,7 +1,8 @@
-import Point from './Point.js'
-import Site from './Site.js'
+import { Point } from './Point.js'
 
-export default class Edge {
+/** @typedef {import('./Site.js').Site} Site */
+
+export class Edge {
   /**
    * @param {Site} a One end of the Edge
    * @param {Site} b The other end
@@ -9,8 +10,6 @@ export default class Edge {
   constructor (a, b) {
     this.a = a
     this.b = b
-
-    this.id = a.id + b.id
 
     this.length = Point.distance(a, b)
 
@@ -23,7 +22,7 @@ export default class Edge {
   /**
    * @param {Site} site
    *
-   * @returns {Boolean} If this Edge have this point in any of its ends
+   * @returns {boolean} If this Edge have this point in any of its ends
    */
   has (site) {
     return (site === this.a || site === this.b)

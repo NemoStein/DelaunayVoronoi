@@ -1,23 +1,31 @@
-import Cell from './Cell.js'
-import Edge from './Edge.js'
-import Site from './Site.js'
+import { Cell } from './Cell.js'
+import { Edge } from './Edge.js'
+import { Site } from './Site.js'
 
-export default class Delaunay {
+/** @typedef {import('./Point.js').Point} Point */
+
+export class Delaunay {
   /**
-   * @param {{x:Number, y:Number}[]} points
+   * @param {Point[]} points
    */
   constructor (points) {
-    if (points.length === 0) {
-      // throw 'Argument "points" must not be empty.'
-    }
-
     this.points = points
-    this.triangulate()
+
+    /** @type {Set<Site>} */
+    this.sites = new Set()
+
+    /** @type {Set<Edge>} */
+    this.edges = new Set()
+
+    /** @type {Set<Cell>} */
+    this.cells = new Set()
+
+    if (this.points.length > 0) {
+      this.triangulate()
+    }
   }
 
   triangulate () {
-    Site.id = 0
-
     const box = this.calculateBoundingBox()
 
     const a = new Site(box.x + box.w / 2, box.y - box.h)
@@ -30,9 +38,19 @@ export default class Delaunay {
 
     const abc = new Cell(ab, bc, ca)
 
-    this.sites = new Set([a, b, c])
-    this.edges = new Set([ab, bc, ca])
-    this.cells = new Set([abc])
+    this.sites.clear()
+    this.edges.clear()
+    this.cells.clear()
+
+    this.sites.add(a)
+    this.sites.add(b)
+    this.sites.add(c)
+
+    this.edges.add(ab)
+    this.edges.add(bc)
+    this.edges.add(ca)
+
+    this.cells.add(abc)
 
     for (const point of this.points) {
       const site = new Site(point.x, point.y)
@@ -96,17 +114,12 @@ export default class Delaunay {
       }
 
       for (const ab of sharedEdges) {
-        const bc = newEdges.find(edge => {
-          return (ab.a == edge.a || ab.a == edge.b)
-        })
+        const bc = newEdges.find(edge => ab.a === edge.a || ab.a === edge.b)
+        const ca = newEdges.find(edge => edge !== bc && (ab.b === edge.a || ab.b === edge.b))
 
-        const ca = newEdges.find(edge => {
-          if (edge == bc) {
-            return
-          }
-
-          return (ab.b == edge.a || ab.b == edge.b)
-        })
+        if (bc == null || ca == null) {
+          throw new Error('Corrupted graph')
+        }
 
         const cell = new Cell(ab, bc, ca)
         this.cells.add(cell)
@@ -119,11 +132,11 @@ export default class Delaunay {
     const removeCells = new Set()
 
     for (const edge of this.edges) {
-      if (edge.a == a || edge.b == a || edge.a == b || edge.b == b || edge.a == c || edge.b == c) {
+      if (edge.a === a || edge.b === a || edge.a === b || edge.b === b || edge.a === c || edge.b === c) {
         removeEdges.add(edge)
 
         for (const cell of this.cells) {
-          if (cell.ab == edge || cell.bc == edge || cell.ca == edge) {
+          if (cell.ab === edge || cell.bc === edge || cell.ca === edge) {
             removeCells.add(cell)
           }
         }
@@ -153,33 +166,31 @@ export default class Delaunay {
   }
 
   calculateBoundingBox () {
-    if (this.points.length === 0) {
-      return {
-        x1: 0,
-        x2: 0,
-        y1: 0,
-        y2: 0
-      }
-    }
-
     const box = {
-      x1: this.points[0].x,
-      x2: this.points[0].x,
-      y1: this.points[0].y,
-      y2: this.points[0].y
+      x: 0,
+      y: 0,
+      w: 0,
+      h: 0
     }
 
-    for (const point of this.points) {
-      box.x1 = (box.x1 > point.x ? point.x : box.x1)
-      box.x2 = (box.x2 < point.x ? point.x : box.x2)
-      box.y1 = (box.y1 > point.y ? point.y : box.y1)
-      box.y2 = (box.y2 < point.y ? point.y : box.y2)
-    }
+    if (this.points.length > 0) {
+      let x1 = this.points[0].x
+      let x2 = this.points[0].x
+      let y1 = this.points[0].y
+      let y2 = this.points[0].y
 
-    box.x = box.x1 - 10
-    box.y = box.y1 - 10
-    box.w = box.x2 - box.x1 + 20
-    box.h = box.y2 - box.y1 + 20
+      for (const point of this.points) {
+        x1 = (x1 > point.x ? point.x : x1)
+        x2 = (x2 < point.x ? point.x : x2)
+        y1 = (y1 > point.y ? point.y : y1)
+        y2 = (y2 < point.y ? point.y : y2)
+      }
+
+      box.x = x1 - 10
+      box.y = y1 - 10
+      box.w = x2 - x1 + 20
+      box.h = y2 - y1 + 20
+    }
 
     return box
   }

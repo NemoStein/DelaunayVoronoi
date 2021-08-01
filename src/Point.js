@@ -1,8 +1,8 @@
-export default class Point {
+export class Point {
   /**
    *
-   * @param {Number} x
-   * @param {Number} y
+   * @param {number} x
+   * @param {number} y
    */
   constructor (x, y) {
     this.x = x
@@ -13,7 +13,7 @@ export default class Point {
    * @param {Point} a
    * @param {Point} b
    *
-   * @returns {Number} Distance between Point A and Point B
+   * @returns {number} Distance between Point A and Point B
    */
   static distance (a, b) {
     return Math.sqrt(Math.abs((b.x - a.x) * (b.x - a.x)) + Math.abs((b.y - a.y) * (b.y - a.y)))
