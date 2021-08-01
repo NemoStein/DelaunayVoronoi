@@ -61,7 +61,9 @@ export class Cell {
   has (siteOrEdge) {
     if (siteOrEdge instanceof Site) {
       return (siteOrEdge === this.a || siteOrEdge === this.b || siteOrEdge === this.c)
-    } else if (siteOrEdge instanceof Edge) {
+    }
+
+    if (siteOrEdge instanceof Edge) {
       return (siteOrEdge === this.ab || siteOrEdge === this.bc || siteOrEdge === this.ca)
     }
 
