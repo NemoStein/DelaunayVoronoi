@@ -1,0 +1,11 @@
+{
+  "name": "@sourbit/delaunay",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "main": "src/Delaunay.js",
+  "scripts": {},
+  "author": "NemoStein <contato@nemostein.com.br> (http://nemostein.com.br)",
+  "license": "UNLICENSED",
+  "dependencies": {}
+}
