@@ -1,12 +1,11 @@
-import Delaunay from '../src/Delaunay.js'
+import { Delaunay } from '../src/Delaunay.js'
 
 document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('Canvas')
-  if (!(canvas instanceof HTMLCanvasElement)) {
-    return
-  }
+  /** @type {HTMLCanvasElement} */
+  const canvas = (document.getElementById('Canvas'))
 
-  const context = canvas.getContext('2d')
+  /** @type {CanvasRenderingContext2D} */
+  const context = (canvas.getContext('2d'))
 
   canvas.width = document.body.clientWidth
   canvas.height = document.body.clientHeight
@@ -14,38 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
   const offsetX = 175
   const offsetY = 325
 
+  /** @type {import('../src/Delaunay.js').Point[]} */
   const originalPoints = []
 
   // const originalPoints =
   // [
-  // 	{x:   0, y:  25},
-  // 	{x:  75, y:  50},
-  // 	{x: 125, y:   0},
-  // 	{x: 150, y: 100},
-  // 	{x:  25, y: 150},
+  //   {x:   0, y:  25},
+  //   {x:  75, y:  50},
+  //   {x: 125, y:   0},
+  //   {x: 150, y: 100},
+  //   {x:  25, y: 150},
   // ]
 
   // const originalPoints =
   // [
-  // 	{x:  150, y:  150},
-  // 	{x:  225, y:  250},
-  // 	{x:  50, y:  50},
+  //   {x:  150, y:  150},
+  //   {x:  225, y:  250},
+  //   {x:  50, y:  50},
   // ]
 
   // const originalPoints =
   // [
-  // 	{x:  80, y: 110},
-  // 	{x: 312, y: 118},
-  // 	{x:  72, y: -63},
-  // 	{x: 232, y: -12},
+  //   {x:  80, y: 110},
+  //   {x: 312, y: 118},
+  //   {x:  72, y: -63},
+  //   {x: 232, y: -12},
   // ]
 
   // const originalPoints =
   // [
-  // 	{x: 100, y: 100},
-  // 	{x: 110, y: 100},
-  // 	{x: 120, y: 100},
-  // 	{x: 110, y: 130},
+  //   {x: 100, y: 100},
+  //   {x: 110, y: 100},
+  //   {x: 120, y: 100},
+  //   {x: 110, y: 130},
   // ]
 
   const drawSites = true
@@ -53,9 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const drawCells = true
   const drawCircumcircles = true
   const drawCircumcenter = true
-  const drawLabels = true
   const grayScale = true
 
+  /**
+   * @param {Delaunay} graph
+   */
   const draw = function (graph) {
     context.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -67,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
           context.fillStyle = 'rgba(0, 0, 0, ' + (Math.random() * 0.2 + 0.1) + ')'
         } else {
           context.fillStyle = 'rgba(' +
-						Math.floor(Math.random() * 256) + ', ' +
-						Math.floor(Math.random() * 256) + ', ' +
-						Math.floor(Math.random() * 256) + ', 0.35)'
+            Math.floor(Math.random() * 256) + ', ' +
+            Math.floor(Math.random() * 256) + ', ' +
+            Math.floor(Math.random() * 256) + ', 0.35)'
         }
         context.moveTo(cell.a.x + offsetX, cell.a.y + offsetY)
         context.lineTo(cell.b.x + offsetX, cell.b.y + offsetY)
@@ -84,9 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
             context.strokeStyle = 'rgba(0, 0, 0, ' + (Math.random() * 0.2 + 0.1) + ')'
           } else {
             context.strokeStyle = 'rgba(' +
-							Math.floor(Math.random() * 85) + ', ' +
-							Math.floor(Math.random() * 85) + ', ' +
-							Math.floor(Math.random() * 85) + ', 0.35)'
+              Math.floor(Math.random() * 85) + ', ' +
+              Math.floor(Math.random() * 85) + ', ' +
+              Math.floor(Math.random() * 85) + ', 0.35)'
           }
 
           context.arc(cell.circumcenter.x + offsetX, cell.circumcenter.y + offsetY, cell.circumradius, 0, Math.PI * 2)
@@ -98,11 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             context.fillRect(cell.circumcenter.x + offsetX - 3, cell.circumcenter.y + offsetY - 3, 6, 6)
             context.fill()
           }
-        }
-
-        if (drawLabels) {
-          context.fillStyle = 'black'
-          context.fillText(cell.id, cell.centroid.x + offsetX, cell.centroid.y + offsetY)
         }
       })
     }
@@ -116,19 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
           context.strokeStyle = 'rgba(0, 0, 0, 0.5)'
         } else {
           context.strokeStyle = 'rgba(' +
-						Math.floor(Math.random() * 170) + ', ' +
-						Math.floor(Math.random() * 170) + ', ' +
-						Math.floor(Math.random() * 170) + ', 0.75)'
+            Math.floor(Math.random() * 170) + ', ' +
+            Math.floor(Math.random() * 170) + ', ' +
+            Math.floor(Math.random() * 170) + ', 0.75)'
         }
 
         context.moveTo(edge.a.x + offsetX, edge.a.y + offsetY)
         context.lineTo(edge.b.x + offsetX, edge.b.y + offsetY)
         context.stroke()
-
-        if (drawLabels) {
-          context.fillStyle = 'black'
-          context.fillText(edge.id, edge.center.x + offsetX, edge.center.y + offsetY)
-        }
       })
     }
 
@@ -138,11 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         context.fillStyle = 'red'
         context.fillRect(site.x + offsetX - 3, site.y + offsetY - 3, 6, 6)
         context.fill()
-
-        if (drawLabels) {
-          context.fillStyle = 'black'
-          context.fillText(site.id, site.x + offsetX + 4, site.y + offsetY + 8)
-        }
       })
     }
   }
