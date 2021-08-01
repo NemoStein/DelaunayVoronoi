@@ -11,6 +11,8 @@ export class Edge {
     this.a = a
     this.b = b
 
+    this.virtual = a.virtual || b.virtual
+
     this.length = Point.distance(a, b)
 
     this.center = new Point(

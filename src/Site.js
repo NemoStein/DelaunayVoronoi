@@ -4,10 +4,11 @@ export class Site extends Point {
   /**
    * @param {number} x Site X position
    * @param {number} y Site Y position
+   * @param {boolean} virtual
    */
-  constructor (x, y) {
+  constructor (x, y, virtual = false) {
     super(x, y)
 
-    console.log(x, y)
+    this.virtual = virtual
   }
 }

@@ -13,6 +13,8 @@ export class Cell {
     this.bc = bc
     this.ca = ca
 
+    this.virtual = ab.virtual || bc.virtual || ca.virtual
+
     const a = this.a = ab.a
     const b = this.b = (a === bc.a ? bc.b : bc.a)
     const c = this.c = (b === ca.a ? ca.b : ca.a)
