@@ -20,8 +20,6 @@ export class Cell {
     this.circumcenter = calculateCircumcenter(this.a, this.b, this.c)
     this.circumradius = calculateCircumradius(this.a, this.b, this.c)
     this.centroid = calculateCentroid(this.a, this.b, this.c)
-
-    this.virtual = ab.virtual || bc.virtual || ca.virtual
   }
 
   /**

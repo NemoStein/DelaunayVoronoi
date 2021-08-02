@@ -13,8 +13,6 @@ export class Edge {
 
     this.length = Point.distance(a, b)
     this.center = calculateCenter(b, a)
-
-    this.virtual = a.virtual || b.virtual
   }
 
   /**

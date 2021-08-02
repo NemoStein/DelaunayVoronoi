@@ -142,6 +142,18 @@ export class Delaunay {
         }
       }
     }
+
+    this.sites.delete(a)
+    this.sites.delete(b)
+    this.sites.delete(c)
+
+    for (const edge of removeEdges) {
+      this.edges.delete(edge)
+    }
+
+    for (const cell of removeCells) {
+      this.cells.delete(cell)
+    }
   }
 
   /**
