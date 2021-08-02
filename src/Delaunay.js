@@ -132,12 +132,12 @@ export class Delaunay {
     const removeCells = new Set()
 
     for (const edge of this.edges) {
-      if (edge.a === a || edge.b === a || edge.a === b || edge.b === b || edge.a === c || edge.b === c) {
-        removeEdges.add(edge)
+      if (edge.has(a) || edge.has(b) || edge.has(c)) {
+        // removeEdges.add(edge)
 
         for (const cell of this.cells) {
           if (cell.ab === edge || cell.bc === edge || cell.ca === edge) {
-            removeCells.add(cell)
+            // removeCells.add(cell)
           }
         }
       }
@@ -198,10 +198,13 @@ export class Delaunay {
         y2 = (y2 < point.y ? point.y : y2)
       }
 
-      box.x = x1 - 10
-      box.y = y1 - 10
-      box.w = x2 - x1 + 20
-      box.h = y2 - y1 + 20
+      const width = Math.abs(x2 - x1)
+      const height = Math.abs(y2 - y1)
+
+      box.x = x1 - width
+      box.y = y1 - height
+      box.w = width * 3
+      box.h = height * 3
     }
 
     return box
