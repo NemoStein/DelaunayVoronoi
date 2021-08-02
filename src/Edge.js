@@ -11,14 +11,10 @@ export class Edge {
     this.a = a
     this.b = b
 
-    this.virtual = a.virtual || b.virtual
-
     this.length = Point.distance(a, b)
+    this.center = calculateCenter(b, a)
 
-    this.center = new Point(
-      (b.x - a.x) / 2 + a.x,
-      (b.y - a.y) / 2 + a.y
-    )
+    this.virtual = a.virtual || b.virtual
   }
 
   /**
@@ -29,4 +25,15 @@ export class Edge {
   has (site) {
     return (site === this.a || site === this.b)
   }
+}
+
+/**
+ * @param {Point} b
+ * @param {Point} a
+ */
+const calculateCenter = (b, a) => {
+  return new Point(
+    (b.x - a.x) / 2 + a.x,
+    (b.y - a.y) / 2 + a.y
+  )
 }
