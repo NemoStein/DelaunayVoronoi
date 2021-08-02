@@ -56,9 +56,16 @@ export class Delaunay {
       const site = new Site(point.x, point.y)
       const affectedCells = this.getAffectedCells(site)
 
+      /** @type {Set<Edge>} */
       const possibleSharedEdges = new Set()
+
+      /** @type {Set<Edge>} */
       const sharedEdges = new Set()
+
+      /** @type {Set<Site>} */
       const sharedSites = new Set()
+
+      /** @type {Edge[]} */
       const newEdges = []
 
       for (const cell of affectedCells) {
@@ -114,8 +121,8 @@ export class Delaunay {
       }
 
       for (const ab of sharedEdges) {
-        const bc = newEdges.find(edge => ab.a === edge.a || ab.a === edge.b)
-        const ca = newEdges.find(edge => edge !== bc && (ab.b === edge.a || ab.b === edge.b))
+        const bc = newEdges.find(edge => edge.has(ab.a))
+        const ca = newEdges.find(edge => edge !== bc && edge.has(ab.b))
 
         if (bc == null || ca == null) {
           throw new Error('Corrupted graph')
@@ -133,11 +140,11 @@ export class Delaunay {
 
     for (const edge of this.edges) {
       if (edge.has(a) || edge.has(b) || edge.has(c)) {
-        // removeEdges.add(edge)
+        removeEdges.add(edge)
 
         for (const cell of this.cells) {
-          if (cell.ab === edge || cell.bc === edge || cell.ca === edge) {
-            // removeCells.add(cell)
+          if (cell.has(edge)) {
+            removeCells.add(cell)
           }
         }
       }
