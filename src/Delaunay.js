@@ -121,12 +121,11 @@ export class Delaunay {
       }
 
       for (const ab of sharedEdges) {
-        const bc = newEdges.find(edge => edge.has(ab.a))
-        const ca = newEdges.find(edge => edge !== bc && edge.has(ab.b))
+        /** @type {Edge} */
+        const bc = (newEdges.find(edge => edge.has(ab.a)))
 
-        if (bc == null || ca == null) {
-          throw new Error('Corrupted graph')
-        }
+        /** @type {Edge} */
+        const ca = (newEdges.find(edge => edge !== bc && edge.has(ab.b)))
 
         const cell = new Cell(ab, bc, ca)
         this.cells.add(cell)
