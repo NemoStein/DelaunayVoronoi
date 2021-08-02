@@ -6,6 +6,6 @@
   "main": "src/Delaunay.js",
   "scripts": {},
   "author": "NemoStein <contato@nemostein.com.br> (http://nemostein.com.br)",
-  "license": "UNLICENSED",
+  "license": "CC-BY-SA-4.0",
   "dependencies": {}
 }
