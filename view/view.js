@@ -9,44 +9,6 @@ const context = (canvas.getContext('2d'))
 canvas.width = canvas.clientWidth
 canvas.height = canvas.clientHeight
 
-const offsetX = 200
-const offsetY = 200
-
-/** @type {import('../src/Delaunay.js').Point[]} */
-const originalPoints = []
-
-// const originalPoints =
-// [
-//   {x:   0, y:  25},
-//   {x:  75, y:  50},
-//   {x: 125, y:   0},
-//   {x: 150, y: 100},
-//   {x:  25, y: 150},
-// ]
-
-// const originalPoints =
-// [
-//   {x:  150, y:  150},
-//   {x:  225, y:  250},
-//   {x:  50, y:  50},
-// ]
-
-// const originalPoints =
-// [
-//   {x:  80, y: 110},
-//   {x: 312, y: 118},
-//   {x:  72, y: -63},
-//   {x: 232, y: -12},
-// ]
-
-// const originalPoints =
-// [
-//   {x: 100, y: 100},
-//   {x: 110, y: 100},
-//   {x: 120, y: 100},
-//   {x: 110, y: 130},
-// ]
-
 const options = {
   drawSites: true,
   drawEdges: true,
@@ -79,7 +41,7 @@ for (const key in options) {
 const draw = function (graph) {
   context.clearRect(0, 0, canvas.width, canvas.height)
 
-  graph.cells.forEach(function (cell) {
+  for (const cell of graph.cells) {
     if (options.drawCells) {
       context.beginPath()
 
@@ -89,9 +51,9 @@ const draw = function (graph) {
       } else {
         context.fillStyle = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, 0.35)`
       }
-      context.moveTo(cell.a.x + offsetX, cell.a.y + offsetY)
-      context.lineTo(cell.b.x + offsetX, cell.b.y + offsetY)
-      context.lineTo(cell.c.x + offsetX, cell.c.y + offsetY)
+      context.moveTo(cell.a.x, cell.a.y)
+      context.lineTo(cell.b.x, cell.b.y)
+      context.lineTo(cell.c.x, cell.c.y)
       context.fill()
     }
 
@@ -105,20 +67,20 @@ const draw = function (graph) {
         context.strokeStyle = `rgba(${Math.floor(Math.random() * 85)}, ${Math.floor(Math.random() * 85)}, ${Math.floor(Math.random() * 85)}, 0.35)`
       }
 
-      context.arc(cell.circumcenter.x + offsetX, cell.circumcenter.y + offsetY, cell.circumradius, 0, Math.PI * 2)
+      context.arc(cell.circumcenter.x, cell.circumcenter.y, cell.circumradius, 0, Math.PI * 2)
       context.stroke()
     }
 
     if (options.drawCircumcenter) {
       context.beginPath()
       context.fillStyle = 'blue'
-      context.fillRect(cell.circumcenter.x + offsetX - 3, cell.circumcenter.y + offsetY - 3, 6, 6)
+      context.fillRect(cell.circumcenter.x - 3, cell.circumcenter.y - 3, 6, 6)
       context.fill()
     }
-  })
+  }
 
   if (options.drawEdges) {
-    graph.edges.forEach(function (edge) {
+    for (const edge of graph.edges) {
       context.beginPath()
       context.lineWidth = 1.5
 
@@ -128,44 +90,60 @@ const draw = function (graph) {
         context.strokeStyle = `rgba(${Math.floor(Math.random() * 170)}, ${Math.floor(Math.random() * 170)}, ${Math.floor(Math.random() * 170)}, 0.75)`
       }
 
-      context.moveTo(edge.a.x + offsetX, edge.a.y + offsetY)
-      context.lineTo(edge.b.x + offsetX, edge.b.y + offsetY)
+      context.moveTo(edge.a.x, edge.a.y)
+      context.lineTo(edge.b.x, edge.b.y)
       context.stroke()
-    })
-  }
-
-  if (options.drawSites) {
-    graph.sites.forEach(function (site) {
-      context.beginPath()
-      context.fillStyle = 'red'
-      context.fillRect(site.x + offsetX - 3, site.y + offsetY - 3, 6, 6)
-      context.fill()
-    })
-  }
-}
-
-let total = originalPoints.length + 1
-document.addEventListener('click', function () {
-  const points = []
-
-  for (let i = 0; i < originalPoints.length; i++) {
-    if (i < total) {
-      points.push(originalPoints[i])
     }
   }
 
-  draw(new Delaunay(points))
+  if (options.drawSites) {
+    for (const site of graph.sites) {
+      context.beginPath()
+      context.fillStyle = 'red'
+      context.fillRect(site.x - 3, site.y - 3, 6, 6)
+      context.fill()
+    }
+  }
+}
 
-  total++
-})
+/** @type {import('../src/Point.js').Point[]} */
+const points = []
+
+// [
+//   { x: 0, y: 25 },
+//   { x: 75, y: 50 },
+//   { x: 125, y: 0 },
+//   { x: 150, y: 100 },
+//   { x: 25, y: 150 }
+// ]
+
+// [
+//   { x: 150, y: 150 },
+//   { x: 225, y: 250 },
+//   { x: 50, y: 50 }
+// ]
+
+// [
+//   { x: 80, y: 110 },
+//   { x: 312, y: 118 },
+//   { x: 72, y: -63 },
+//   { x: 232, y: -12 }
+// ]
+
+// [
+//   { x: 100, y: 100 },
+//   { x: 110, y: 100 },
+//   { x: 120, y: 100 },
+//   { x: 110, y: 130 }
+// ]
 
 canvas.addEventListener('click', function (event) {
-  const point = {
-    x: event.clientX - offsetX,
-    y: event.clientY - offsetY
-  }
+  points.push({
+    x: event.clientX,
+    y: event.clientY
+  })
 
-  originalPoints.push(point)
+  draw(new Delaunay(points))
 })
 
-draw(new Delaunay(originalPoints))
+draw(new Delaunay(points))
