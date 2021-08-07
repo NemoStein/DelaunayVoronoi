@@ -7,7 +7,5 @@ export class Site extends Point {
    */
   constructor (x, y) {
     super(x, y)
-
-    console.log(x, y)
   }
 }
