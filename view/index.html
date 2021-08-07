@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        font-size: 100%;
+        font: inherit;
+        vertical-align: baseline;
+        box-sizing: border-box;
+        user-select: none;
+      }
+
+      html,
+      body,
+      #Main {
+        font-family: sans-serif;
+        width: 100%;
+        height: 100%;
+      }
+
+      #Main {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #Options {
+        height: 30px;
+        padding-top: 5px;
+      }
+
+      #Options label {
+        margin-left: 13px;
+      }
+
+      #Options label input {
+        margin-right: 3px;
+      }
+
+      #Canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script src="view.js" type="module"></script>
+  </head>
+
+  <body>
+    <div id="Main">
+      <canvas id="Canvas"></canvas>
+      <div id="Options"></div>
+    </div>
+  </body>
+</html>
