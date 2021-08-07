@@ -26,11 +26,12 @@ export class Delaunay {
   }
 
   triangulate () {
-    const box = this.calculateBoundingBox()
+    const n = 2 ** 32
+    const step = Math.PI * 2 / 3
 
-    const a = new Site(box.x + box.w / 2, box.y - box.h)
-    const b = new Site(box.x + box.w * 1.5, box.y + box.h)
-    const c = new Site(box.x - box.w / 2, box.y + box.h)
+    const a = new Site(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
+    const b = new Site(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
+    const c = new Site(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
 
     const ab = new Edge(a, b)
     const bc = new Edge(b, c)
@@ -181,38 +182,5 @@ export class Delaunay {
     }
 
     return result
-  }
-
-  calculateBoundingBox () {
-    const box = {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0
-    }
-
-    if (this.points.length > 0) {
-      let x1 = this.points[0].x
-      let x2 = this.points[0].x
-      let y1 = this.points[0].y
-      let y2 = this.points[0].y
-
-      for (const point of this.points) {
-        x1 = (x1 > point.x ? point.x : x1)
-        x2 = (x2 < point.x ? point.x : x2)
-        y1 = (y1 > point.y ? point.y : y1)
-        y2 = (y2 < point.y ? point.y : y2)
-      }
-
-      const width = Math.abs(x2 - x1)
-      const height = Math.abs(y2 - y1)
-
-      box.x = x1 - width
-      box.y = y1 - height
-      box.w = width * 3
-      box.h = height * 3
-    }
-
-    return box
   }
 }
