@@ -71,6 +71,12 @@ export class GraphRenderer {
         this.context.moveTo(edge.a.x, edge.a.y)
         this.context.lineTo(edge.b.x, edge.b.y)
         this.context.stroke()
+
+        const x = edge.a.x + Math.cos(edge.slope) * edge.length * 0.75
+        const y = edge.a.y + Math.sin(edge.slope) * edge.length * 0.75
+
+        this.context.fillStyle = 'rgb(255, 0, 255)'
+        this.context.fillRect(x - 2, y - 2, 4, 4)
       }
     }
 
