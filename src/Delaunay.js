@@ -26,32 +26,7 @@ export class Delaunay {
   }
 
   triangulate () {
-    const n = 2 ** 32
-    const step = Math.PI * 2 / 3
-
-    const a = new Site(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
-    const b = new Site(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
-    const c = new Site(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
-
-    const ab = new Edge(a, b)
-    const bc = new Edge(b, c)
-    const ca = new Edge(c, a)
-
-    const abc = new Cell(ab, bc, ca)
-
-    this.sites.clear()
-    this.edges.clear()
-    this.cells.clear()
-
-    this.sites.add(a)
-    this.sites.add(b)
-    this.sites.add(c)
-
-    this.edges.add(ab)
-    this.edges.add(bc)
-    this.edges.add(ca)
-
-    this.cells.add(abc)
+    const { a, b, c } = this.insertSuperTriangle()
 
     for (const point of this.points) {
       const site = new Site(point.x, point.y)
@@ -135,6 +110,46 @@ export class Delaunay {
       this.sites.add(site)
     }
 
+    this.removeSuperTriangle(a, b, c)
+  }
+
+  insertSuperTriangle () {
+    const n = 2 ** 32
+    const step = Math.PI * 2 / 3
+
+    const a = new Site(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
+    const b = new Site(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
+    const c = new Site(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
+
+    const ab = new Edge(a, b)
+    const bc = new Edge(b, c)
+    const ca = new Edge(c, a)
+
+    const abc = new Cell(ab, bc, ca)
+
+    this.sites.clear()
+    this.edges.clear()
+    this.cells.clear()
+
+    this.sites.add(a)
+    this.sites.add(b)
+    this.sites.add(c)
+
+    this.edges.add(ab)
+    this.edges.add(bc)
+    this.edges.add(ca)
+
+    this.cells.add(abc)
+
+    return { a, b, c }
+  }
+
+  /**
+   * @param {Site} a
+   * @param {Site} b
+   * @param {Site} c
+   */
+  removeSuperTriangle (a, b, c) {
     const removeEdges = new Set()
     const removeCells = new Set()
 
