@@ -12,7 +12,8 @@ export class Edge {
     this.b = b
 
     this.length = Point.distance(a, b)
-    this.center = calculateCenter(b, a)
+    this.center = calculateCenter(a, b)
+    this.slope = calculateSlope(a, b)
   }
 
   /**
@@ -26,12 +27,20 @@ export class Edge {
 }
 
 /**
- * @param {Point} b
  * @param {Point} a
+ * @param {Point} b
  */
-const calculateCenter = (b, a) => {
+const calculateCenter = (a, b) => {
   return new Point(
     (b.x - a.x) / 2 + a.x,
     (b.y - a.y) / 2 + a.y
   )
+}
+
+/**
+ * @param {Point} a
+ * @param {Point} b
+ */
+const calculateSlope = (a, b) => {
+  return Math.atan2(b.y - a.y, b.x - a.x)
 }
