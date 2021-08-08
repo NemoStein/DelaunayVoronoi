@@ -1,3 +1,5 @@
+import { Point } from '../src/Point.js'
+
 export class GraphRenderer {
   /**
    * @param {HTMLCanvasElement} canvas
@@ -72,11 +74,16 @@ export class GraphRenderer {
         this.context.lineTo(edge.b.x, edge.b.y)
         this.context.stroke()
 
-        const x = edge.a.x + Math.cos(edge.slope) * edge.length * 0.75
-        const y = edge.a.y + Math.sin(edge.slope) * edge.length * 0.75
+        const p1 = Point.rotateAround(Point.translate({ x: 0, y: -3 }, edge.center), edge.center, edge.slope)
+        const p2 = Point.rotateAround(Point.translate({ x: 9, y: 0 }, edge.center), edge.center, edge.slope)
+        const p3 = Point.rotateAround(Point.translate({ x: 0, y: 3 }, edge.center), edge.center, edge.slope)
 
+        this.context.beginPath()
         this.context.fillStyle = 'rgb(255, 0, 255)'
-        this.context.fillRect(x - 2, y - 2, 4, 4)
+        this.context.moveTo(p1.x, p1.y)
+        this.context.lineTo(p2.x, p2.y)
+        this.context.lineTo(p3.x, p3.y)
+        this.context.fill()
       }
     }
 
