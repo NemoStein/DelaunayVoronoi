@@ -7,7 +7,7 @@ const options = {
   drawCells: true,
   drawCircumcircles: true,
   drawCircumcenter: true,
-  grayScale: true
+  drawVoronoi: true
 }
 
 /** @type {HTMLCanvasElement} */
