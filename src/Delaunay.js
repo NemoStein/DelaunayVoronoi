@@ -20,9 +20,7 @@ export class Delaunay {
     /** @type {Set<Cell>} */
     this.cells = new Set()
 
-    if (this.points.length > 0) {
-      this.triangulate()
-    }
+    this.triangulate()
   }
 
   triangulate () {
@@ -30,6 +28,8 @@ export class Delaunay {
 
     for (const point of this.points) {
       const site = new Site(point.x, point.y)
+      this.sites.add(site)
+
       const affectedCells = this.getAffectedCells(site)
 
       /** @type {Set<Edge>} */
@@ -180,8 +180,6 @@ export class Delaunay {
 
   /**
    * @param {Site} site
-   *
-   * @returns {Cell[]}
    */
   getAffectedCells (site) {
     /** @type {Cell[]} */
