@@ -19,7 +19,7 @@ const redraw = () => {
   renderer.draw(graph, options)
 }
 
-/** @type {import('../src/Point.js').Point[]} */
+/** @type {import('../src/geom/Point.js').Point[]} */
 const points = [
   // 3 Collinear Points
   // { x: 100, y: 300 },

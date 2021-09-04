@@ -1,8 +1,6 @@
-import { Cell } from './Cell.js'
-import { Edge } from './Edge.js'
-import { Site } from './Site.js'
-
-/** @typedef {import('./Point.js').Point} Point */
+import { Point } from './geom/Point.js'
+import { Segment } from './geom/Segment.js'
+import { Triangle } from './geom/Triangle.js'
 
 export class Delaunay {
   /**
@@ -11,13 +9,13 @@ export class Delaunay {
   constructor (points) {
     this.points = points
 
-    /** @type {Set<Site>} */
+    /** @type {Set<Point>} */
     this.sites = new Set()
 
-    /** @type {Set<Edge>} */
+    /** @type {Set<Segment>} */
     this.edges = new Set()
 
-    /** @type {Set<Cell>} */
+    /** @type {Set<Triangle>} */
     this.cells = new Set()
 
     this.triangulate()
@@ -27,21 +25,21 @@ export class Delaunay {
     const { a, b, c } = this.insertSuperTriangle()
 
     for (const point of this.points) {
-      const site = new Site(point.x, point.y)
+      const site = new Point(point.x, point.y)
       this.sites.add(site)
 
       const affectedCells = this.getAffectedCells(site)
 
-      /** @type {Set<Edge>} */
+      /** @type {Set<Segment>} */
       const possibleSharedEdges = new Set()
 
-      /** @type {Set<Edge>} */
+      /** @type {Set<Segment>} */
       const sharedEdges = new Set()
 
-      /** @type {Set<Site>} */
+      /** @type {Set<Point>} */
       const sharedSites = new Set()
 
-      /** @type {Edge[]} */
+      /** @type {Segment[]} */
       const newEdges = []
 
       for (const cell of affectedCells) {
@@ -90,20 +88,20 @@ export class Delaunay {
       }
 
       for (const shared of sharedSites) {
-        const edge = new Edge(shared, site)
+        const edge = new Segment(shared, site)
 
         newEdges.push(edge)
         this.edges.add(edge)
       }
 
       for (const ab of sharedEdges) {
-        /** @type {Edge} */
+        /** @type {Segment} */
         const bc = (newEdges.find(edge => edge.has(ab.a)))
 
-        /** @type {Edge} */
+        /** @type {Segment} */
         const ca = (newEdges.find(edge => edge !== bc && edge.has(ab.b)))
 
-        const cell = new Cell(ab, bc, ca)
+        const cell = new Triangle(ab, bc, ca)
         this.cells.add(cell)
       }
 
@@ -117,15 +115,15 @@ export class Delaunay {
     const n = 2 ** 32
     const step = Math.PI * 2 / 3
 
-    const a = new Site(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
-    const b = new Site(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
-    const c = new Site(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
+    const a = new Point(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
+    const b = new Point(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
+    const c = new Point(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
 
-    const ab = new Edge(a, b)
-    const bc = new Edge(b, c)
-    const ca = new Edge(c, a)
+    const ab = new Segment(a, b)
+    const bc = new Segment(b, c)
+    const ca = new Segment(c, a)
 
-    const abc = new Cell(ab, bc, ca)
+    const abc = new Triangle(ab, bc, ca)
 
     this.sites.clear()
     this.edges.clear()
@@ -145,9 +143,9 @@ export class Delaunay {
   }
 
   /**
-   * @param {Site} a
-   * @param {Site} b
-   * @param {Site} c
+   * @param {Point} a
+   * @param {Point} b
+   * @param {Point} c
    */
   removeSuperTriangle (a, b, c) {
     const removeEdges = new Set()
@@ -179,10 +177,10 @@ export class Delaunay {
   }
 
   /**
-   * @param {Site} site
+   * @param {Point} site
    */
   getAffectedCells (site) {
-    /** @type {Cell[]} */
+    /** @type {Triangle[]} */
     const result = []
 
     for (const cell of this.cells) {

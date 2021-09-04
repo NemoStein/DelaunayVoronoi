@@ -1,11 +1,9 @@
 import { Point } from './Point.js'
 
-/** @typedef {import('./Site.js').Site} Site */
-
-export class Edge {
+export class Segment {
   /**
-   * @param {Site} a One end of the Edge
-   * @param {Site} b The other end
+   * @param {Point} a One end of the line segment
+   * @param {Point} b The other end
    */
   constructor (a, b) {
     this.a = a
@@ -17,12 +15,12 @@ export class Edge {
   }
 
   /**
-   * @param {Site} site
+   * @param {Point} point
    *
-   * @returns {boolean} If this Edge have this point in any of its ends
+   * @returns {boolean} If this line segment have this point in any of its ends
    */
-  has (site) {
-    return (site === this.a || site === this.b)
+  has (point) {
+    return (point === this.a || point === this.b)
   }
 }
 

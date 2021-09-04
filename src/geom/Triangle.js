@@ -1,12 +1,11 @@
-import { Edge } from './Edge.js'
 import { Point } from './Point.js'
-import { Site } from './Site.js'
+import { Segment } from './Segment.js'
 
-export class Cell {
+export class Triangle {
   /**
-   * @param {Edge} ab
-   * @param {Edge} bc
-   * @param {Edge} ca
+   * @param {Segment} ab
+   * @param {Segment} bc
+   * @param {Segment} ca
    */
   constructor (ab, bc, ca) {
     this.ab = ab
@@ -23,20 +22,20 @@ export class Cell {
   }
 
   /**
-   * @param {Site|Edge} siteOrEdge
+   * @param {Point|Segment} pointOrSegment
    *
-   * @returns {boolean} If this Cell have this Site/Edge as one of its vertices/sides
+   * @returns {boolean} If this Triangle have this Point/Segment as one of its vertices/edges
    */
-  has (siteOrEdge) {
-    if (siteOrEdge instanceof Site) {
-      return (siteOrEdge === this.a || siteOrEdge === this.b || siteOrEdge === this.c)
+  has (pointOrSegment) {
+    if (pointOrSegment instanceof Point) {
+      return (pointOrSegment === this.a || pointOrSegment === this.b || pointOrSegment === this.c)
     }
 
-    if (siteOrEdge instanceof Edge) {
-      return (siteOrEdge === this.ab || siteOrEdge === this.bc || siteOrEdge === this.ca)
+    if (pointOrSegment instanceof Segment) {
+      return (pointOrSegment === this.ab || pointOrSegment === this.bc || pointOrSegment === this.ca)
     }
 
-    throw new Error('Expected "siteOrEdge" to be of type Site or Edge')
+    throw new Error('Expected "pointOrSegment" to be of type Point or Segment')
   }
 }
 

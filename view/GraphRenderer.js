@@ -1,6 +1,6 @@
-import { Point } from '../src/Point.js'
+import { Point } from '../src/geom/Point.js'
 
-/** @typedef {import('../src/Cell.js').Cell} Cell */
+/** @typedef {import('../src/Triangle.js').Triangle} Cell */
 
 export class GraphRenderer {
   /**
