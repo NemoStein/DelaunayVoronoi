@@ -1,13 +1,15 @@
 import { Delaunay } from '../src/Delaunay.js'
 import { GraphRenderer } from './GraphRenderer.js'
 
+/** @typedef {options} DrawOptions */
 const options = {
   drawSites: true,
   drawEdges: true,
   drawCells: true,
   drawCircumcircles: true,
   drawCircumcenter: true,
-  drawVoronoi: true
+  drawVoronoi: true,
+  drawMST: true
 }
 
 /** @type {HTMLCanvasElement} */
@@ -19,7 +21,7 @@ const redraw = () => {
   renderer.draw(graph, options)
 }
 
-/** @type {import('../src/geom/Point.js').Point[]} */
+/** @type {import('@sourbit/geom').Point[]} */
 const points = [
   // 3 Collinear Points
   // { x: 100, y: 300 },

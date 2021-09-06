@@ -1,6 +1,4 @@
-import { Point } from './geom/Point.js'
-import { Segment } from './geom/Segment.js'
-import { Triangle } from './geom/Triangle.js'
+import { Point, Segment, Triangle } from '@sourbit/geom'
 
 export class Delaunay {
   /**

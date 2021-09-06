@@ -1,6 +1,6 @@
-import { Point } from '../src/geom/Point.js'
+import { Point } from '@sourbit/geom'
 
-/** @typedef {import('../src/Triangle.js').Triangle} Cell */
+/** @typedef {import('@sourbit/geom').Triangle} Triangle */
 
 export class GraphRenderer {
   /**
@@ -18,7 +18,7 @@ export class GraphRenderer {
 
   /**
    * @param {import('../src/Delaunay.js').Delaunay} graph
-   * @param {any} options
+   * @param {import('./app.js').DrawOptions} options
    */
   draw (graph, options) {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -85,7 +85,7 @@ export class GraphRenderer {
     }
 
     if (options.drawVoronoi) {
-      /** @type {Map<Cell, Cell[]>} */
+      /** @type {Map<Triangle, Triangle[]>} */
       const neighbourhood = new Map()
       for (const cell of graph.cells) {
         const neighbours = []
@@ -109,6 +109,10 @@ export class GraphRenderer {
           this.context.stroke()
         }
       }
+    }
+
+    if (options.drawMST) {
+      // const segments = [...graph.edges].sort((a, b) => a.length - b.length)
     }
   }
 }
