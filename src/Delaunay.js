@@ -109,6 +109,33 @@ export class Delaunay {
 
     removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells)
   }
+
+  generateMSP () {
+    /** @type {Segment[]} */
+    const msp = []
+    const segments = [...this.edges].sort((a, b) => a.length - b.length)
+
+    /** @type {Map<Point, Point>} */
+    const parents = new Map()
+
+    /** @param {Point} site */
+    const traverse = site => {
+      while (parents.has(site)) site = /** @type {Point} */ (parents.get(site))
+      return site
+    }
+
+    for (const segment of segments) {
+      const a = traverse(segment.a)
+      const b = traverse(segment.b)
+
+      if (a !== b) {
+        parents.set(a, b)
+        msp.push(segment)
+      }
+    }
+
+    return msp
+  }
 }
 
 /**
