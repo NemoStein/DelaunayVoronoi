@@ -5,6 +5,7 @@ export class Delaunay {
    * @param {Point[]} points
    */
   constructor (points) {
+    /** @private */
     this.points = points
 
     /** @type {Set<Point>} */
