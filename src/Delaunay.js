@@ -20,13 +20,13 @@ export class Delaunay {
   }
 
   triangulate () {
-    const { a, b, c } = this.insertSuperTriangle()
+    const { a, b, c } = insertSuperTriangle(this.sites, this.edges, this.cells)
 
     for (const point of this.points) {
       const site = new Point(point.x, point.y)
       this.sites.add(site)
 
-      const affectedCells = this.getAffectedCells(site)
+      const affectedCells = getAffectedCells(site, this.cells)
 
       /** @type {Set<Segment>} */
       const possibleSharedEdges = new Set()
@@ -106,90 +106,99 @@ export class Delaunay {
       this.sites.add(site)
     }
 
-    this.removeSuperTriangle(a, b, c)
+    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells)
   }
+}
 
-  insertSuperTriangle () {
-    const n = 2 ** 32
-    const step = Math.PI * 2 / 3
+/**
+ * @param {Set<Point>} sites
+ * @param {Set<Segment>} edges
+ * @param {Set<Triangle>} cells
+ */
+const insertSuperTriangle = (sites, edges, cells) => {
+  const n = 2 ** 32
+  const step = Math.PI * 2 / 3
 
-    const a = new Point(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
-    const b = new Point(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
-    const c = new Point(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
+  const a = new Point(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
+  const b = new Point(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
+  const c = new Point(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
 
-    const ab = new Segment(a, b)
-    const bc = new Segment(b, c)
-    const ca = new Segment(c, a)
+  const ab = new Segment(a, b)
+  const bc = new Segment(b, c)
+  const ca = new Segment(c, a)
 
-    const abc = new Triangle(ab, bc, ca)
+  const abc = new Triangle(ab, bc, ca)
 
-    this.sites.clear()
-    this.edges.clear()
-    this.cells.clear()
+  sites.clear()
+  edges.clear()
+  cells.clear()
 
-    this.sites.add(a)
-    this.sites.add(b)
-    this.sites.add(c)
+  sites.add(a)
+  sites.add(b)
+  sites.add(c)
 
-    this.edges.add(ab)
-    this.edges.add(bc)
-    this.edges.add(ca)
+  edges.add(ab)
+  edges.add(bc)
+  edges.add(ca)
 
-    this.cells.add(abc)
+  cells.add(abc)
 
-    return { a, b, c }
-  }
+  return { a, b, c }
+}
 
-  /**
-   * @param {Point} a
-   * @param {Point} b
-   * @param {Point} c
-   */
-  removeSuperTriangle (a, b, c) {
-    const removeEdges = new Set()
-    const removeCells = new Set()
+/**
+ * @param {Point} a
+ * @param {Point} b
+ * @param {Point} c
+ * @param {Set<Point>} sites
+ * @param {Set<Segment>} edges
+ * @param {Set<Triangle>} cells
+ */
+const removeSuperTriangle = (a, b, c, sites, edges, cells) => {
+  const removeEdges = new Set()
+  const removeCells = new Set()
 
-    for (const edge of this.edges) {
-      if (edge.has(a) || edge.has(b) || edge.has(c)) {
-        removeEdges.add(edge)
+  for (const edge of edges) {
+    if (edge.has(a) || edge.has(b) || edge.has(c)) {
+      removeEdges.add(edge)
 
-        for (const cell of this.cells) {
-          if (cell.has(edge)) {
-            removeCells.add(cell)
-          }
+      for (const cell of cells) {
+        if (cell.has(edge)) {
+          removeCells.add(cell)
         }
       }
     }
+  }
 
-    this.sites.delete(a)
-    this.sites.delete(b)
-    this.sites.delete(c)
+  sites.delete(a)
+  sites.delete(b)
+  sites.delete(c)
 
-    for (const edge of removeEdges) {
-      this.edges.delete(edge)
-    }
+  for (const edge of removeEdges) {
+    edges.delete(edge)
+  }
 
-    for (const cell of removeCells) {
-      this.cells.delete(cell)
+  for (const cell of removeCells) {
+    cells.delete(cell)
+  }
+}
+
+/**
+ * @param {Point} site
+ * @param {Set<Triangle>} cells
+ */
+const getAffectedCells = (site, cells) => {
+  /** @type {Triangle[]} */
+  const result = []
+
+  for (const cell of cells) {
+    const dx = site.x - cell.circumcenter.x
+    const dy = site.y - cell.circumcenter.y
+
+    if (dx * dx + dy * dy <= cell.circumradius * cell.circumradius) {
+      result.push(cell)
     }
   }
 
-  /**
-   * @param {Point} site
-   */
-  getAffectedCells (site) {
-    /** @type {Triangle[]} */
-    const result = []
-
-    for (const cell of this.cells) {
-      const dx = site.x - cell.circumcenter.x
-      const dy = site.y - cell.circumcenter.y
-
-      if (dx * dx + dy * dy <= cell.circumradius * cell.circumradius) {
-        result.push(cell)
-      }
-    }
-
-    return result
-  }
+  return result
 }
