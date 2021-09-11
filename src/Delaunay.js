@@ -4,10 +4,7 @@ export class Delaunay {
   /**
    * @param {Point[]} points
    */
-  constructor (points) {
-    /** @private */
-    this.points = points
-
+  constructor (points = []) {
     /** @type {Set<Point>} */
     this.sites = new Set()
 
@@ -17,17 +14,20 @@ export class Delaunay {
     /** @type {Set<Triangle>} */
     this.cells = new Set()
 
+    /** @private @type {Point[]} */
+    this.points = []
+    for (const point of points) {
+      this.addPoint(point)
+    }
+
     this.triangulate()
   }
 
   triangulate () {
-    const { a, b, c } = insertSuperTriangle(this.sites, this.edges, this.cells)
+    const { a, b, c } = insertSuperTriangle(this.points, this.sites, this.edges, this.cells)
 
-    for (const point of this.points) {
-      const site = new Point(point.x, point.y)
-      this.sites.add(site)
-
-      const affectedCells = getAffectedCells(site, this.cells)
+    for (const site of this.points) {
+      const affectedCells = getAffectedCells(site, this.cells, a, b, c)
 
       /** @type {Set<Segment>} */
       const possibleSharedEdges = new Set()
@@ -110,6 +110,14 @@ export class Delaunay {
     removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells)
   }
 
+  /**
+   * @param {Point} point
+   */
+  addPoint (point) {
+    const site = new Point(point.x, point.y)
+    this.points.push(site)
+  }
+
   generateMSP () {
     /** @type {Segment[]} */
     const msp = []
@@ -139,17 +147,41 @@ export class Delaunay {
 }
 
 /**
+ * @param {Point[]} points
  * @param {Set<Point>} sites
  * @param {Set<Segment>} edges
  * @param {Set<Triangle>} cells
  */
-const insertSuperTriangle = (sites, edges, cells) => {
-  const n = 2 ** 32
+const insertSuperTriangle = (points, sites, edges, cells) => {
+  const min = {
+    x: Infinity,
+    y: Infinity
+  }
+  const max = {
+    x: -Infinity,
+    y: -Infinity
+  }
+
+  for (const point of points) {
+    if (min.x > point.x) min.x = point.x
+    if (min.y > point.y) min.y = point.y
+    if (max.x < point.x) max.x = point.x
+    if (max.y < point.y) max.y = point.y
+  }
+
+  const offsetX = (min.x + max.x) / 2
+  const offsetY = (min.y + max.y) / 2
+
+  const distance = Point.distance(
+    new Point(min.x, min.y),
+    new Point(max.x, max.y)
+  )
+
   const step = Math.PI * 2 / 3
 
-  const a = new Point(Math.cos(1 * step) * n, Math.sin(1 * step) * n)
-  const b = new Point(Math.cos(2 * step) * n, Math.sin(2 * step) * n)
-  const c = new Point(Math.cos(3 * step) * n, Math.sin(3 * step) * n)
+  const a = new Point(Math.cos(0 * step) * distance + offsetX, Math.sin(0 * step) * distance + offsetY)
+  const b = new Point(Math.cos(1 * step) * distance + offsetX, Math.sin(1 * step) * distance + offsetY)
+  const c = new Point(Math.cos(2 * step) * distance + offsetX, Math.sin(2 * step) * distance + offsetY)
 
   const ab = new Segment(a, b)
   const bc = new Segment(b, c)
@@ -214,12 +246,62 @@ const removeSuperTriangle = (a, b, c, sites, edges, cells) => {
 /**
  * @param {Point} site
  * @param {Set<Triangle>} cells
+ * @param {Point} a
+ * @param {Point} b
+ * @param {Point} c
  */
-const getAffectedCells = (site, cells) => {
+const getAffectedCells = (site, cells, a, b, c) => {
   /** @type {Triangle[]} */
   const result = []
 
   for (const cell of cells) {
+    const hasA = cell.has(a)
+    const hasB = cell.has(b)
+    const hasC = cell.has(c)
+
+    let shared = 0
+
+    if (hasA) shared++
+    if (hasB) shared++
+    if (hasC) shared++
+
+    if (shared === 1) {
+      const shared = hasA ? a : hasB ? b : c
+      const segment = !cell.ab.has(shared)
+        ? cell.ab
+        : !cell.bc.has(shared)
+            ? cell.bc
+            : cell.ca
+
+      const side = Segment.pointSide(segment, site)
+
+      if (cell.winding !== side) {
+        result.push(cell)
+      }
+
+      continue
+    }
+
+    if (shared === 2) {
+      const notShared = !hasA ? a : !hasB ? b : c
+      const segment = !cell.ab.has(notShared)
+        ? cell.ab
+        : !cell.bc.has(notShared)
+            ? cell.bc
+            : cell.ca
+      const slope = segment.slope
+      const thirdVertex = !segment.has(cell.a) ? cell.a : !segment.has(cell.b) ? cell.b : cell.c
+
+      const slopedSegment = new Segment(thirdVertex, new Point(Math.cos(slope) * 100 + thirdVertex.x, Math.sin(slope) * 100 + thirdVertex.y))
+      const side = Segment.pointSide(slopedSegment, site)
+
+      if (cell.winding === side) {
+        result.push(cell)
+      }
+
+      continue
+    }
+
     const dx = site.x - cell.circumcenter.x
     const dy = site.y - cell.circumcenter.y
 
