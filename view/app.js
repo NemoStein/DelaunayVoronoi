@@ -1,8 +1,13 @@
+/* global localStorage */
+
 import { Delaunay } from '../src/Delaunay.js'
 import { GraphRenderer } from './GraphRenderer.js'
 
-/** @typedef {options} DrawOptions */
-const options = {
+const OPTIONS_STORAGE_KEY = 'graph-options'
+const persistedOptions = JSON.parse(localStorage.getItem(OPTIONS_STORAGE_KEY) ?? '{}')
+
+/** @typedef {defaults} DrawOptions */
+const defaults = {
   drawSites: true,
   drawEdges: true,
   drawCells: false,
@@ -11,6 +16,9 @@ const options = {
   drawVoronoi: false,
   drawMST: false
 }
+
+/** @type {DrawOptions} */
+const options = Object.assign({}, defaults, persistedOptions)
 
 /** @type {import('@sourbit/geom').Point[]} */
 const points = [
@@ -65,6 +73,8 @@ for (const key in options) {
   input.checked = options[/** @type {keyof options} */ (key)]
   input.addEventListener('click', () => {
     options[/** @type {keyof options} */ (key)] = input.checked
+    localStorage.setItem(OPTIONS_STORAGE_KEY, JSON.stringify(options))
+
     redraw()
   })
 
