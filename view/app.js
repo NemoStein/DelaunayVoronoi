@@ -5,29 +5,20 @@ import { GraphRenderer } from './GraphRenderer.js'
 const options = {
   drawSites: true,
   drawEdges: true,
-  drawCells: true,
-  drawCircumcircles: true,
-  drawCircumcenter: true,
-  drawVoronoi: true,
-  drawMST: true
-}
-
-/** @type {HTMLCanvasElement} */
-const canvas = (document.getElementById('Canvas'))
-const renderer = new GraphRenderer(canvas)
-
-const redraw = () => {
-  const graph = new Delaunay(points)
-  renderer.draw(graph, options)
+  drawCells: false,
+  drawCircumcircles: false,
+  drawCircumcenter: false,
+  drawVoronoi: false,
+  drawMST: false
 }
 
 /** @type {import('@sourbit/geom').Point[]} */
 const points = [
   // 3 Collinear Points
-  // { x: 100, y: 300 },
-  // { x: 300, y: 300 },
-  // { x: 500, y: 300 },
-  // { x: 300, y: 100 }
+  // { x: 200, y: 500 },
+  // { x: 1000, y: 500 },
+  // { x: 600, y: 500 },
+  // { x: 300, y: 500 },
 
   // Broken Tessellation
   // { x: 264, y: 556 },
@@ -46,6 +37,25 @@ const points = [
   // { x: 225, y: 250 },
   // { x: 50, y: 50 }
 ]
+
+/** @type {HTMLCanvasElement} */
+const canvas = (document.getElementById('Canvas'))
+const renderer = new GraphRenderer(canvas)
+
+const redraw = () => {
+  renderer.draw(graph, options)
+}
+
+let totalPoints = 100
+while (totalPoints-- > 0) {
+  points.push({
+    x: Math.round(Math.random() * (canvas.width - 50) + 25),
+    y: Math.round(Math.random() * (canvas.height - 50) + 25)
+  })
+}
+
+const graph = new Delaunay(points)
+console.log(graph)
 
 /** @type {HTMLElement} */
 const optionsElement = (document.getElementById('Options'))
@@ -72,7 +82,9 @@ canvas.addEventListener('click', event => {
   }
 
   if (!points.find(point => point.x === newPoint.x && point.y === newPoint.y)) {
-    points.push(newPoint)
+    graph.addPoint(newPoint)
+    graph.triangulate()
+
     redraw()
   }
 })

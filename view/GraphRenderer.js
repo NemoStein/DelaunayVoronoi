@@ -1,5 +1,3 @@
-import { Point } from '@sourbit/geom'
-
 /** @typedef {import('@sourbit/geom').Triangle} Triangle */
 
 export class GraphRenderer {
@@ -61,17 +59,6 @@ export class GraphRenderer {
         this.context.moveTo(edge.a.x, edge.a.y)
         this.context.lineTo(edge.b.x, edge.b.y)
         this.context.stroke()
-
-        const p1 = Point.rotateAround(Point.translate({ x: 0, y: -3 }, edge.center), edge.center, edge.slope)
-        const p2 = Point.rotateAround(Point.translate({ x: 9, y: 0 }, edge.center), edge.center, edge.slope)
-        const p3 = Point.rotateAround(Point.translate({ x: 0, y: 3 }, edge.center), edge.center, edge.slope)
-
-        this.context.beginPath()
-        this.context.fillStyle = 'rgb(255, 0, 255)'
-        this.context.moveTo(p1.x, p1.y)
-        this.context.lineTo(p2.x, p2.y)
-        this.context.lineTo(p3.x, p3.y)
-        this.context.fill()
       }
     }
 
@@ -112,7 +99,18 @@ export class GraphRenderer {
     }
 
     if (options.drawMST) {
-      // const segments = [...graph.edges].sort((a, b) => a.length - b.length)
+      const msp = graph.generateMSP()
+
+      this.context.beginPath()
+      this.context.lineWidth = 4
+      this.context.strokeStyle = 'black'
+
+      for (const segment of msp) {
+        this.context.moveTo(segment.a.x, segment.a.y)
+        this.context.lineTo(segment.b.x, segment.b.y)
+      }
+
+      this.context.stroke()
     }
   }
 }
