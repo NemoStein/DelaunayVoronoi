@@ -302,10 +302,13 @@ const getAffectedCells = (site, cells, a, b, c) => {
       continue
     }
 
-    const dx = site.x - cell.circumcenter.x
-    const dy = site.y - cell.circumcenter.y
+    const circumcenter = cell.circumcenter
+    const circumradius = cell.circumradius
 
-    if (dx * dx + dy * dy <= cell.circumradius * cell.circumradius) {
+    const dx = site.x - circumcenter.x
+    const dy = site.y - circumcenter.y
+
+    if (dx ** 2 + dy ** 2 <= circumradius ** 2) {
       result.push(cell)
     }
   }
