@@ -4,7 +4,9 @@
   "description": "",
   "type": "module",
   "main": "src/Delaunay.js",
-  "scripts": {},
+  "scripts": {
+    "start": "servor . --static --reload --browse"
+  },
   "author": "NemoStein <contato@nemostein.com.br> (http://nemostein.com.br)",
   "license": "CC-BY-SA-4.0",
   "dependencies": {
