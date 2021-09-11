@@ -118,9 +118,9 @@ export class Delaunay {
     this.points.push(site)
   }
 
-  generateMSP () {
+  generateMST () {
     /** @type {Segment[]} */
-    const msp = []
+    const mst = []
     const segments = [...this.edges].sort((a, b) => a.length - b.length)
 
     /** @type {Map<Point, Point>} */
@@ -138,11 +138,11 @@ export class Delaunay {
 
       if (a !== b) {
         parents.set(a, b)
-        msp.push(segment)
+        mst.push(segment)
       }
     }
 
-    return msp
+    return mst
   }
 }
 
