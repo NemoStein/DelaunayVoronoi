@@ -14,6 +14,9 @@ export class Delaunay {
     /** @type {Set<Triangle>} */
     this.cells = new Set()
 
+    /** @type {Map<Point, Set<Segment>>} */
+    this.siteEdges = new Map()
+
     /** @private @type {Point[]} */
     this.points = []
     for (const point of points) {
@@ -51,18 +54,24 @@ export class Delaunay {
             }
 
             if (neighbour.has(cell.ab)) {
+              this.siteEdges.get(cell.ab.a)?.delete(cell.ab)
+              this.siteEdges.get(cell.ab.b)?.delete(cell.ab)
               this.edges.delete(cell.ab)
             } else {
               possibleSharedEdges.add(cell.ab)
             }
 
             if (neighbour.has(cell.bc)) {
+              this.siteEdges.get(cell.bc.a)?.delete(cell.bc)
+              this.siteEdges.get(cell.bc.b)?.delete(cell.bc)
               this.edges.delete(cell.bc)
             } else {
               possibleSharedEdges.add(cell.bc)
             }
 
             if (neighbour.has(cell.ca)) {
+              this.siteEdges.get(cell.ca.a)?.delete(cell.ca)
+              this.siteEdges.get(cell.ca.b)?.delete(cell.ca)
               this.edges.delete(cell.ca)
             } else {
               possibleSharedEdges.add(cell.ca)
@@ -88,7 +97,8 @@ export class Delaunay {
 
       for (const shared of sharedSites) {
         const edge = new Segment(shared, site)
-
+        this.siteEdges.get(shared)?.add(edge)
+        this.siteEdges.get(site)?.add(edge)
         newEdges.push(edge)
         this.edges.add(edge)
       }
@@ -107,7 +117,7 @@ export class Delaunay {
       this.sites.add(site)
     }
 
-    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells)
+    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells, this.siteEdges)
   }
 
   /**
@@ -115,6 +125,8 @@ export class Delaunay {
    */
   addPoint (point) {
     const site = new Point(point.x, point.y)
+
+    this.siteEdges.set(site, new Set())
     this.points.push(site)
   }
 
@@ -213,8 +225,9 @@ const insertSuperTriangle = (points, sites, edges, cells) => {
  * @param {Set<Point>} sites
  * @param {Set<Segment>} edges
  * @param {Set<Triangle>} cells
+ * @param {Map<Point, Set<Segment>>} siteEdges
  */
-const removeSuperTriangle = (a, b, c, sites, edges, cells) => {
+const removeSuperTriangle = (a, b, c, sites, edges, cells, siteEdges) => {
   const removeEdges = new Set()
   const removeCells = new Set()
 
@@ -236,11 +249,18 @@ const removeSuperTriangle = (a, b, c, sites, edges, cells) => {
 
   for (const edge of removeEdges) {
     edges.delete(edge)
+
+    siteEdges.get(edge.a)?.delete(edge)
+    siteEdges.get(edge.b)?.delete(edge)
   }
 
   for (const cell of removeCells) {
     cells.delete(cell)
   }
+
+  siteEdges.delete(a)
+  siteEdges.delete(b)
+  siteEdges.delete(c)
 }
 
 /**
