@@ -17,6 +17,9 @@ export class Delaunay {
     /** @type {Map<Point, Set<Segment>>} */
     this.siteEdges = new Map()
 
+    /** @type {Map<Segment, Set<Triangle>>} */
+    this.edgeCells = new Map()
+
     /** @private @type {Point[]} */
     this.points = []
     for (const point of points) {
@@ -47,6 +50,10 @@ export class Delaunay {
       for (const cell of affectedCells) {
         this.cells.delete(cell)
 
+        this.edgeCells.get(cell.ab)?.delete(cell)
+        this.edgeCells.get(cell.bc)?.delete(cell)
+        this.edgeCells.get(cell.ca)?.delete(cell)
+
         if (affectedCells.length > 1) {
           for (const neighbour of affectedCells) {
             if (cell === neighbour) {
@@ -56,6 +63,7 @@ export class Delaunay {
             if (neighbour.has(cell.ab)) {
               this.siteEdges.get(cell.ab.a)?.delete(cell.ab)
               this.siteEdges.get(cell.ab.b)?.delete(cell.ab)
+              this.edgeCells.delete(cell.ab)
               this.edges.delete(cell.ab)
             } else {
               possibleSharedEdges.add(cell.ab)
@@ -64,6 +72,7 @@ export class Delaunay {
             if (neighbour.has(cell.bc)) {
               this.siteEdges.get(cell.bc.a)?.delete(cell.bc)
               this.siteEdges.get(cell.bc.b)?.delete(cell.bc)
+              this.edgeCells.delete(cell.bc)
               this.edges.delete(cell.bc)
             } else {
               possibleSharedEdges.add(cell.bc)
@@ -72,6 +81,7 @@ export class Delaunay {
             if (neighbour.has(cell.ca)) {
               this.siteEdges.get(cell.ca.a)?.delete(cell.ca)
               this.siteEdges.get(cell.ca.b)?.delete(cell.ca)
+              this.edgeCells.delete(cell.ca)
               this.edges.delete(cell.ca)
             } else {
               possibleSharedEdges.add(cell.ca)
@@ -97,8 +107,12 @@ export class Delaunay {
 
       for (const shared of sharedSites) {
         const edge = new Segment(shared, site)
+
         this.siteEdges.get(shared)?.add(edge)
         this.siteEdges.get(site)?.add(edge)
+
+        this.edgeCells.set(edge, new Set())
+
         newEdges.push(edge)
         this.edges.add(edge)
       }
@@ -111,23 +125,31 @@ export class Delaunay {
         const ca = (newEdges.find(edge => edge !== bc && edge.has(ab.b)))
 
         const cell = new Triangle(ab, bc, ca)
+
+        this.edgeCells.get(ab)?.add(cell)
+        this.edgeCells.get(bc)?.add(cell)
+        this.edgeCells.get(ca)?.add(cell)
+
         this.cells.add(cell)
       }
 
       this.sites.add(site)
     }
 
-    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells, this.siteEdges)
+    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells, this.siteEdges, this.edgeCells)
   }
 
   /**
    * @param {Point} point
    */
   addPoint (point) {
-    const site = new Point(point.x, point.y)
+    const overlaps = this.points.some(pointInSet => point.x === pointInSet.x && point.y === pointInSet.y)
+    if (!overlaps) {
+      const site = new Point(point.x, point.y)
 
-    this.siteEdges.set(site, new Set())
-    this.points.push(site)
+      this.siteEdges.set(site, new Set())
+      this.points.push(site)
+    }
   }
 
   generateMST () {
@@ -226,8 +248,9 @@ const insertSuperTriangle = (points, sites, edges, cells) => {
  * @param {Set<Segment>} edges
  * @param {Set<Triangle>} cells
  * @param {Map<Point, Set<Segment>>} siteEdges
+ * @param {Map<Segment, Set<Triangle>>} edgeCells
  */
-const removeSuperTriangle = (a, b, c, sites, edges, cells, siteEdges) => {
+const removeSuperTriangle = (a, b, c, sites, edges, cells, siteEdges, edgeCells) => {
   const removeEdges = new Set()
   const removeCells = new Set()
 
@@ -247,15 +270,21 @@ const removeSuperTriangle = (a, b, c, sites, edges, cells, siteEdges) => {
   sites.delete(b)
   sites.delete(c)
 
+  for (const cell of removeCells) {
+    cells.delete(cell)
+
+    edgeCells.get(cell.ab)?.delete(cell)
+    edgeCells.get(cell.bc)?.delete(cell)
+    edgeCells.get(cell.ca)?.delete(cell)
+  }
+
   for (const edge of removeEdges) {
     edges.delete(edge)
 
     siteEdges.get(edge.a)?.delete(edge)
     siteEdges.get(edge.b)?.delete(edge)
-  }
 
-  for (const cell of removeCells) {
-    cells.delete(cell)
+    edgeCells.delete(edge)
   }
 
   siteEdges.delete(a)
