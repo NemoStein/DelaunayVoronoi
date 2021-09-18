@@ -24,26 +24,8 @@ const options = Object.assign({}, defaults, persistedOptions)
 const points = [
   // 3 Collinear Points
   // { x: 200, y: 500 },
-  // { x: 1000, y: 500 },
   // { x: 600, y: 500 },
-  // { x: 300, y: 500 },
-
-  // Broken Tessellation
-  // { x: 264, y: 556 },
-  // { x: 423, y: 488 },
-  // { x: 597, y: 400 },
-  // { x: 665, y: 370 },
-  // { x: 391, y: 375 }
-
-  // { x: 0, y: 25 },
-  // { x: 75, y: 50 },
-  // { x: 125, y: 0 },
-  // { x: 150, y: 100 },
-  // { x: 25, y: 150 }
-
-  // { x: 150, y: 150 },
-  // { x: 225, y: 250 },
-  // { x: 50, y: 50 }
+  // { x: 1000, y: 500 }
 ]
 
 /** @type {HTMLCanvasElement} */
@@ -54,13 +36,31 @@ const redraw = () => {
   renderer.draw(graph, options)
 }
 
-let totalPoints = 100
+// === Random Points =======================================
+let totalPoints = 2000
 while (totalPoints-- > 0) {
   points.push({
     x: Math.round(Math.random() * (canvas.width - 50) + 25),
     y: Math.round(Math.random() * (canvas.height - 50) + 25)
   })
 }
+
+// console.log(points.sort((a, b) => a.x === b.x ? a.y - b.y : a.x - b.x))
+// =========================================================
+
+// === Grid ================================================
+// const cols = 20
+// const rows = 15
+
+// for (let x = 0; x < cols; x++) {
+//   for (let y = 0; y < rows; y++) {
+//     points.push({
+//       x: x * 50 + 50,
+//       y: y * 50 + 50
+//     })
+//   }
+// }
+// =========================================================
 
 const graph = new Delaunay(points)
 console.log(graph)
@@ -86,17 +86,24 @@ for (const key in options) {
 }
 
 canvas.addEventListener('click', event => {
-  const newPoint = {
-    x: event.clientX,
-    y: event.clientY
+  if (event.ctrlKey) {
+    graph.addPoint({
+      x: Math.round(event.clientX / 100) * 100,
+      y: Math.round(event.clientY / 100) * 100
+    })
+  } else {
+    graph.addPoint({
+      x: event.clientX,
+      y: event.clientY
+    })
   }
+  graph.triangulate()
 
-  if (!points.find(point => point.x === newPoint.x && point.y === newPoint.y)) {
-    graph.addPoint(newPoint)
-    graph.triangulate()
+  redraw()
+})
 
-    redraw()
-  }
+window.addEventListener('resize', () => {
+  redraw()
 })
 
 redraw()

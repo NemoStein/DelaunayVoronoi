@@ -27,7 +27,10 @@ export class GraphRenderer {
    * @param {import('./app.js').DrawOptions} options
    */
   draw (graph, options) {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.canvas.width = this.canvas.clientWidth
+    this.canvas.height = this.canvas.clientHeight
+
+    // this.render(graph, renderTest)
 
     if (options.drawCells) {
       this.render(graph, renderCells)
@@ -130,24 +133,21 @@ const renderSites = (graph, context) => {
 
 /** @type {Renderer} */
 const renderVoronoi = (graph, context) => {
-  /** @type {Map<Triangle, Triangle[]>} */
-  const neighbourhood = new Map()
-  for (const cell of graph.cells) {
-    const neighbours = []
-    for (const neighbour of graph.cells) {
-      if (cell !== neighbour) {
-        if (neighbour.has(cell.ab) || neighbour.has(cell.bc) || neighbour.has(cell.ca)) {
-          neighbours.push(neighbour)
-        }
-      }
-    }
-    neighbourhood.set(cell, neighbours)
-  }
-
   context.lineWidth = 1
   context.strokeStyle = 'rgba(0, 255, 0, 0.5)'
-  for (const [cell, neighbours] of neighbourhood) {
-    for (const neighbor of neighbours) {
+  for (const cell of graph.cells) {
+    /** @type {Set<Triangle>} */
+    const neighbors = new Set()
+
+    const tris = [
+      .../** @type {Set<Triangle>} */(graph.edgeCells.get(cell.ab)).values(),
+      .../** @type {Set<Triangle>} */(graph.edgeCells.get(cell.bc)).values(),
+      .../** @type {Set<Triangle>} */(graph.edgeCells.get(cell.ca)).values()
+    ]
+
+    tris.forEach(tri => neighbors.add(tri))
+
+    for (const neighbor of neighbors) {
       context.beginPath()
       context.moveTo(cell.circumcenter.x, cell.circumcenter.y)
       context.lineTo(neighbor.circumcenter.x, neighbor.circumcenter.y)
@@ -160,14 +160,13 @@ const renderVoronoi = (graph, context) => {
 const renderMST = (graph, context) => {
   const mst = graph.generateMST()
 
-  context.beginPath()
   context.lineWidth = 4
   context.strokeStyle = 'black'
 
   for (const segment of mst) {
+    context.beginPath()
     context.moveTo(segment.a.x, segment.a.y)
     context.lineTo(segment.b.x, segment.b.y)
+    context.stroke()
   }
-
-  context.stroke()
 }
