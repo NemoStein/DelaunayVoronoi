@@ -125,6 +125,15 @@ export class Delaunay {
         const ca = (newEdges.find(edge => edge !== bc && edge.has(ab.b)))
 
         const cell = new Triangle(ab, bc, ca)
+        // Breaking collinearity
+        while (cell.area === 0) {
+          cell.a.x += Math.random() - 0.5
+          cell.a.y += Math.random() - 0.5
+          cell.b.x += Math.random() - 0.5
+          cell.b.y += Math.random() - 0.5
+          cell.c.x += Math.random() - 0.5
+          cell.c.y += Math.random() - 0.5
+        }
 
         this.edgeCells.get(ab)?.add(cell)
         this.edgeCells.get(bc)?.add(cell)
@@ -145,7 +154,7 @@ export class Delaunay {
   addPoint (point) {
     const overlaps = this.points.some(pointInSet => point.x === pointInSet.x && point.y === pointInSet.y)
     if (!overlaps) {
-      const site = new Point(point.x, point.y)
+      const site = new Point(point.x + Math.random() - 0.5, point.y + Math.random() - 0.5)
 
       this.siteEdges.set(site, new Set())
       this.points.push(site)
