@@ -1,178 +1,158 @@
 import { Point, Segment, Triangle } from '@sourbit/geom'
 
 export class Delaunay {
+  constructor () {
+    /** @type {Set<Point>} */
+    this.points = new Set()
+
+    /** @type {Set<Segment>} */
+    this.segments = new Set()
+
+    /** @type {Set<Triangle>} */
+    this.triangles = new Set()
+
+    /** @type {Map<Point, Set<Segment>>} */
+    this.pointSegments = new Map()
+
+    /** @type {Map<Segment, Set<Triangle>>} */
+    this.segmentTriangles = new Map()
+  }
+
   /**
    * @param {Point[]} points
    */
-  constructor (points = []) {
-    /** @type {Set<Point>} */
-    this.sites = new Set()
+  triangulate (points) {
+    const { a, b, c } = this.insertSuperTriangle(points)
 
-    /** @type {Set<Segment>} */
-    this.edges = new Set()
-
-    /** @type {Set<Triangle>} */
-    this.cells = new Set()
-
-    /** @type {Map<Point, Set<Segment>>} */
-    this.siteEdges = new Map()
-
-    /** @type {Map<Segment, Set<Triangle>>} */
-    this.edgeCells = new Map()
-
-    /** @private @type {Point[]} */
-    this.points = []
     for (const point of points) {
-      this.addPoint(point)
-    }
-
-    this.triangulate()
-  }
-
-  triangulate () {
-    const { a, b, c } = insertSuperTriangle(this.points, this.sites, this.edges, this.cells)
-
-    for (const site of this.points) {
-      const affectedCells = getAffectedCells(site, this.cells, a, b, c)
+      this.pointSegments.set(point, new Set())
+      const affectedTriangles = this.getAffectedTriangles(point, a, b, c)
 
       /** @type {Set<Segment>} */
-      const possibleSharedEdges = new Set()
+      const possibleSharedSegments = new Set()
 
       /** @type {Set<Segment>} */
-      const sharedEdges = new Set()
+      const sharedSegments = new Set()
 
       /** @type {Set<Point>} */
-      const sharedSites = new Set()
+      const sharedPoints = new Set()
 
       /** @type {Segment[]} */
-      const newEdges = []
+      const newSegments = []
 
-      for (const cell of affectedCells) {
-        this.cells.delete(cell)
+      for (const triangle of affectedTriangles) {
+        this.triangles.delete(triangle)
 
-        this.edgeCells.get(cell.ab)?.delete(cell)
-        this.edgeCells.get(cell.bc)?.delete(cell)
-        this.edgeCells.get(cell.ca)?.delete(cell)
+        this.segmentTriangles.get(triangle.ab)?.delete(triangle)
+        this.segmentTriangles.get(triangle.bc)?.delete(triangle)
+        this.segmentTriangles.get(triangle.ca)?.delete(triangle)
 
-        if (affectedCells.length > 1) {
-          for (const neighbour of affectedCells) {
-            if (cell === neighbour) {
+        if (affectedTriangles.length > 1) {
+          for (const neighbour of affectedTriangles) {
+            if (triangle === neighbour) {
               continue
             }
 
-            if (neighbour.has(cell.ab)) {
-              this.siteEdges.get(cell.ab.a)?.delete(cell.ab)
-              this.siteEdges.get(cell.ab.b)?.delete(cell.ab)
-              this.edgeCells.delete(cell.ab)
-              this.edges.delete(cell.ab)
+            if (neighbour.has(triangle.ab)) {
+              this.pointSegments.get(triangle.ab.a)?.delete(triangle.ab)
+              this.pointSegments.get(triangle.ab.b)?.delete(triangle.ab)
+              this.segmentTriangles.delete(triangle.ab)
+              this.segments.delete(triangle.ab)
             } else {
-              possibleSharedEdges.add(cell.ab)
+              possibleSharedSegments.add(triangle.ab)
             }
 
-            if (neighbour.has(cell.bc)) {
-              this.siteEdges.get(cell.bc.a)?.delete(cell.bc)
-              this.siteEdges.get(cell.bc.b)?.delete(cell.bc)
-              this.edgeCells.delete(cell.bc)
-              this.edges.delete(cell.bc)
+            if (neighbour.has(triangle.bc)) {
+              this.pointSegments.get(triangle.bc.a)?.delete(triangle.bc)
+              this.pointSegments.get(triangle.bc.b)?.delete(triangle.bc)
+              this.segmentTriangles.delete(triangle.bc)
+              this.segments.delete(triangle.bc)
             } else {
-              possibleSharedEdges.add(cell.bc)
+              possibleSharedSegments.add(triangle.bc)
             }
 
-            if (neighbour.has(cell.ca)) {
-              this.siteEdges.get(cell.ca.a)?.delete(cell.ca)
-              this.siteEdges.get(cell.ca.b)?.delete(cell.ca)
-              this.edgeCells.delete(cell.ca)
-              this.edges.delete(cell.ca)
+            if (neighbour.has(triangle.ca)) {
+              this.pointSegments.get(triangle.ca.a)?.delete(triangle.ca)
+              this.pointSegments.get(triangle.ca.b)?.delete(triangle.ca)
+              this.segmentTriangles.delete(triangle.ca)
+              this.segments.delete(triangle.ca)
             } else {
-              possibleSharedEdges.add(cell.ca)
+              possibleSharedSegments.add(triangle.ca)
             }
           }
         } else {
-          sharedEdges.add(cell.ab)
-          sharedEdges.add(cell.bc)
-          sharedEdges.add(cell.ca)
+          sharedSegments.add(triangle.ab)
+          sharedSegments.add(triangle.bc)
+          sharedSegments.add(triangle.ca)
         }
       }
 
-      for (const edge of possibleSharedEdges) {
-        if (this.edges.has(edge)) {
-          sharedEdges.add(edge)
+      for (const segment of possibleSharedSegments) {
+        if (this.segments.has(segment)) {
+          sharedSegments.add(segment)
         }
       }
 
-      for (const shared of sharedEdges) {
-        sharedSites.add(shared.a)
-        sharedSites.add(shared.b)
+      for (const shared of sharedSegments) {
+        sharedPoints.add(shared.a)
+        sharedPoints.add(shared.b)
       }
 
-      for (const shared of sharedSites) {
-        const edge = new Segment(shared, site)
+      for (const shared of sharedPoints) {
+        const segment = new Segment(shared, point)
 
-        this.siteEdges.get(shared)?.add(edge)
-        this.siteEdges.get(site)?.add(edge)
+        this.pointSegments.get(shared)?.add(segment)
+        this.pointSegments.get(point)?.add(segment)
 
-        this.edgeCells.set(edge, new Set())
+        this.segmentTriangles.set(segment, new Set())
 
-        newEdges.push(edge)
-        this.edges.add(edge)
+        newSegments.push(segment)
+        this.segments.add(segment)
       }
 
-      for (const ab of sharedEdges) {
+      for (const ab of sharedSegments) {
         /** @type {Segment} */
-        const bc = (newEdges.find(edge => edge.has(ab.a)))
+        const bc = (newSegments.find(segment => segment.has(ab.a)))
 
         /** @type {Segment} */
-        const ca = (newEdges.find(edge => edge !== bc && edge.has(ab.b)))
+        const ca = (newSegments.find(segment => segment !== bc && segment.has(ab.b)))
 
-        const cell = new Triangle(ab, bc, ca)
+        const triangle = new Triangle(ab, bc, ca)
         // Breaking collinearity
-        while (cell.area === 0) {
-          cell.a.x += Math.random() - 0.5
-          cell.a.y += Math.random() - 0.5
-          cell.b.x += Math.random() - 0.5
-          cell.b.y += Math.random() - 0.5
-          cell.c.x += Math.random() - 0.5
-          cell.c.y += Math.random() - 0.5
+        while (triangle.area === 0) {
+          triangle.a.x += Math.random() - 0.5
+          triangle.a.y += Math.random() - 0.5
+          triangle.b.x += Math.random() - 0.5
+          triangle.b.y += Math.random() - 0.5
+          triangle.c.x += Math.random() - 0.5
+          triangle.c.y += Math.random() - 0.5
         }
 
-        this.edgeCells.get(ab)?.add(cell)
-        this.edgeCells.get(bc)?.add(cell)
-        this.edgeCells.get(ca)?.add(cell)
+        this.segmentTriangles.get(ab)?.add(triangle)
+        this.segmentTriangles.get(bc)?.add(triangle)
+        this.segmentTriangles.get(ca)?.add(triangle)
 
-        this.cells.add(cell)
+        this.triangles.add(triangle)
       }
 
-      this.sites.add(site)
+      this.points.add(point)
     }
 
-    removeSuperTriangle(a, b, c, this.sites, this.edges, this.cells, this.siteEdges, this.edgeCells)
-  }
-
-  /**
-   * @param {Point} point
-   */
-  addPoint (point) {
-    const overlaps = this.points.some(pointInSet => point.x === pointInSet.x && point.y === pointInSet.y)
-    if (!overlaps) {
-      const site = new Point(point.x + Math.random() - 0.5, point.y + Math.random() - 0.5)
-
-      this.siteEdges.set(site, new Set())
-      this.points.push(site)
-    }
+    this.removeSuperTriangle(a, b, c)
   }
 
   generateMST () {
     /** @type {Segment[]} */
     const mst = []
-    const segments = [...this.edges].sort((a, b) => a.length - b.length)
+    const segments = [...this.segments].sort((a, b) => a.length - b.length)
 
     /** @type {Map<Point, Point>} */
     const parents = new Map()
 
-    /** @param {Point} site */
-    const traverse = site => {
-      while (parents.has(site)) site = /** @type {Point} */ (parents.get(site))
-      return site
+    /** @param {Point} point */
+    const traverse = point => {
+      while (parents.has(point)) point = /** @type {Point} */ (parents.get(point))
+      return point
     }
 
     for (const segment of segments) {
@@ -187,189 +167,180 @@ export class Delaunay {
 
     return mst
   }
-}
 
-/**
- * @param {Point[]} points
- * @param {Set<Point>} sites
- * @param {Set<Segment>} edges
- * @param {Set<Triangle>} cells
- */
-const insertSuperTriangle = (points, sites, edges, cells) => {
-  const min = {
-    x: Infinity,
-    y: Infinity
+  /**
+   * @param {Point[]} points
+   */
+  insertSuperTriangle (points) {
+    const min = {
+      x: Infinity,
+      y: Infinity
+    }
+    const max = {
+      x: -Infinity,
+      y: -Infinity
+    }
+
+    for (const point of points) {
+      if (min.x > point.x) min.x = point.x
+      if (min.y > point.y) min.y = point.y
+      if (max.x < point.x) max.x = point.x
+      if (max.y < point.y) max.y = point.y
+    }
+
+    const offsetX = (min.x + max.x) / 2
+    const offsetY = (min.y + max.y) / 2
+
+    const distance = Point.distance(
+      new Point(min.x, min.y),
+      new Point(max.x, max.y)
+    )
+
+    const step = Math.PI * 2 / 3
+
+    const a = new Point(Math.cos(0 * step) * distance + offsetX, Math.sin(0 * step) * distance + offsetY)
+    const b = new Point(Math.cos(1 * step) * distance + offsetX, Math.sin(1 * step) * distance + offsetY)
+    const c = new Point(Math.cos(2 * step) * distance + offsetX, Math.sin(2 * step) * distance + offsetY)
+
+    const ab = new Segment(a, b)
+    const bc = new Segment(b, c)
+    const ca = new Segment(c, a)
+
+    const abc = new Triangle(ab, bc, ca)
+
+    this.points.clear()
+    this.segments.clear()
+    this.triangles.clear()
+
+    this.points.add(a)
+    this.points.add(b)
+    this.points.add(c)
+
+    this.segments.add(ab)
+    this.segments.add(bc)
+    this.segments.add(ca)
+
+    this.triangles.add(abc)
+
+    return { a, b, c }
   }
-  const max = {
-    x: -Infinity,
-    y: -Infinity
-  }
 
-  for (const point of points) {
-    if (min.x > point.x) min.x = point.x
-    if (min.y > point.y) min.y = point.y
-    if (max.x < point.x) max.x = point.x
-    if (max.y < point.y) max.y = point.y
-  }
+  /**
+   * @param {Point} a
+   * @param {Point} b
+   * @param {Point} c
+   */
+  removeSuperTriangle (a, b, c) {
+    const removeSegments = new Set()
+    const removeTriangles = new Set()
 
-  const offsetX = (min.x + max.x) / 2
-  const offsetY = (min.y + max.y) / 2
+    for (const segment of this.segments) {
+      if (segment.has(a) || segment.has(b) || segment.has(c)) {
+        removeSegments.add(segment)
 
-  const distance = Point.distance(
-    new Point(min.x, min.y),
-    new Point(max.x, max.y)
-  )
-
-  const step = Math.PI * 2 / 3
-
-  const a = new Point(Math.cos(0 * step) * distance + offsetX, Math.sin(0 * step) * distance + offsetY)
-  const b = new Point(Math.cos(1 * step) * distance + offsetX, Math.sin(1 * step) * distance + offsetY)
-  const c = new Point(Math.cos(2 * step) * distance + offsetX, Math.sin(2 * step) * distance + offsetY)
-
-  const ab = new Segment(a, b)
-  const bc = new Segment(b, c)
-  const ca = new Segment(c, a)
-
-  const abc = new Triangle(ab, bc, ca)
-
-  sites.clear()
-  edges.clear()
-  cells.clear()
-
-  sites.add(a)
-  sites.add(b)
-  sites.add(c)
-
-  edges.add(ab)
-  edges.add(bc)
-  edges.add(ca)
-
-  cells.add(abc)
-
-  return { a, b, c }
-}
-
-/**
- * @param {Point} a
- * @param {Point} b
- * @param {Point} c
- * @param {Set<Point>} sites
- * @param {Set<Segment>} edges
- * @param {Set<Triangle>} cells
- * @param {Map<Point, Set<Segment>>} siteEdges
- * @param {Map<Segment, Set<Triangle>>} edgeCells
- */
-const removeSuperTriangle = (a, b, c, sites, edges, cells, siteEdges, edgeCells) => {
-  const removeEdges = new Set()
-  const removeCells = new Set()
-
-  for (const edge of edges) {
-    if (edge.has(a) || edge.has(b) || edge.has(c)) {
-      removeEdges.add(edge)
-
-      for (const cell of cells) {
-        if (cell.has(edge)) {
-          removeCells.add(cell)
+        for (const triangle of this.triangles) {
+          if (triangle.has(segment)) {
+            removeTriangles.add(triangle)
+          }
         }
       }
     }
+
+    this.points.delete(a)
+    this.points.delete(b)
+    this.points.delete(c)
+
+    for (const triangle of removeTriangles) {
+      this.triangles.delete(triangle)
+
+      this.segmentTriangles.get(triangle.ab)?.delete(triangle)
+      this.segmentTriangles.get(triangle.bc)?.delete(triangle)
+      this.segmentTriangles.get(triangle.ca)?.delete(triangle)
+    }
+
+    for (const segment of removeSegments) {
+      this.segments.delete(segment)
+
+      this.pointSegments.get(segment.a)?.delete(segment)
+      this.pointSegments.get(segment.b)?.delete(segment)
+
+      this.segmentTriangles.delete(segment)
+    }
+
+    this.pointSegments.delete(a)
+    this.pointSegments.delete(b)
+    this.pointSegments.delete(c)
   }
 
-  sites.delete(a)
-  sites.delete(b)
-  sites.delete(c)
-
-  for (const cell of removeCells) {
-    cells.delete(cell)
-
-    edgeCells.get(cell.ab)?.delete(cell)
-    edgeCells.get(cell.bc)?.delete(cell)
-    edgeCells.get(cell.ca)?.delete(cell)
-  }
-
-  for (const edge of removeEdges) {
-    edges.delete(edge)
-
-    siteEdges.get(edge.a)?.delete(edge)
-    siteEdges.get(edge.b)?.delete(edge)
-
-    edgeCells.delete(edge)
-  }
-
-  siteEdges.delete(a)
-  siteEdges.delete(b)
-  siteEdges.delete(c)
-}
-
-/**
- * @param {Point} site
- * @param {Set<Triangle>} cells
- * @param {Point} a
- * @param {Point} b
- * @param {Point} c
- */
-const getAffectedCells = (site, cells, a, b, c) => {
+  /**
+   * @param {Point} point
+   * @param {Point} a
+   * @param {Point} b
+   * @param {Point} c
+   */
+  getAffectedTriangles (point, a, b, c) {
   /** @type {Triangle[]} */
-  const result = []
+    const result = []
 
-  for (const cell of cells) {
-    const hasA = cell.has(a)
-    const hasB = cell.has(b)
-    const hasC = cell.has(c)
+    for (const triangle of this.triangles) {
+      const hasA = triangle.has(a)
+      const hasB = triangle.has(b)
+      const hasC = triangle.has(c)
 
-    let shared = 0
+      let shared = 0
 
-    if (hasA) shared++
-    if (hasB) shared++
-    if (hasC) shared++
+      if (hasA) shared++
+      if (hasB) shared++
+      if (hasC) shared++
 
-    if (shared === 1) {
-      const shared = hasA ? a : hasB ? b : c
-      const segment = !cell.ab.has(shared)
-        ? cell.ab
-        : !cell.bc.has(shared)
-            ? cell.bc
-            : cell.ca
+      if (shared === 1) {
+        const shared = hasA ? a : hasB ? b : c
+        const segment = !triangle.ab.has(shared)
+          ? triangle.ab
+          : !triangle.bc.has(shared)
+              ? triangle.bc
+              : triangle.ca
 
-      const side = Segment.pointSide(segment, site)
+        const side = Segment.pointSide(segment, point)
 
-      if (cell.winding !== side) {
-        result.push(cell)
+        if (triangle.winding !== side) {
+          result.push(triangle)
+        }
+
+        continue
       }
 
-      continue
-    }
+      if (shared === 2) {
+        const notShared = !hasA ? a : !hasB ? b : c
+        const segment = !triangle.ab.has(notShared)
+          ? triangle.ab
+          : !triangle.bc.has(notShared)
+              ? triangle.bc
+              : triangle.ca
+        const slope = segment.slope
+        const thirdVertex = !segment.has(triangle.a) ? triangle.a : !segment.has(triangle.b) ? triangle.b : triangle.c
 
-    if (shared === 2) {
-      const notShared = !hasA ? a : !hasB ? b : c
-      const segment = !cell.ab.has(notShared)
-        ? cell.ab
-        : !cell.bc.has(notShared)
-            ? cell.bc
-            : cell.ca
-      const slope = segment.slope
-      const thirdVertex = !segment.has(cell.a) ? cell.a : !segment.has(cell.b) ? cell.b : cell.c
+        const slopedSegment = new Segment(thirdVertex, new Point(Math.cos(slope) * 100 + thirdVertex.x, Math.sin(slope) * 100 + thirdVertex.y))
+        const side = Segment.pointSide(slopedSegment, point)
 
-      const slopedSegment = new Segment(thirdVertex, new Point(Math.cos(slope) * 100 + thirdVertex.x, Math.sin(slope) * 100 + thirdVertex.y))
-      const side = Segment.pointSide(slopedSegment, site)
+        if (triangle.winding === side) {
+          result.push(triangle)
+        }
 
-      if (cell.winding === side) {
-        result.push(cell)
+        continue
       }
 
-      continue
+      const circumcenter = triangle.circumcenter
+      const circumradius = triangle.circumradius
+
+      const dx = point.x - circumcenter.x
+      const dy = point.y - circumcenter.y
+
+      if (dx ** 2 + dy ** 2 <= circumradius ** 2) {
+        result.push(triangle)
+      }
     }
 
-    const circumcenter = cell.circumcenter
-    const circumradius = cell.circumradius
-
-    const dx = site.x - circumcenter.x
-    const dy = site.y - circumcenter.y
-
-    if (dx ** 2 + dy ** 2 <= circumradius ** 2) {
-      result.push(cell)
-    }
+    return result
   }
-
-  return result
 }
