@@ -1,6 +1,6 @@
 /* global localStorage */
 
-import { Delaunay } from '../src/Delaunay.js'
+import { PointGraph } from '../src/PointGraph.js'
 import { GraphRenderer } from './GraphRenderer.js'
 
 const OPTIONS_STORAGE_KEY = 'graph-options'
@@ -37,7 +37,7 @@ const redraw = () => {
 }
 
 // === Random Points =======================================
-let totalPoints = 2000
+let totalPoints = 100
 while (totalPoints-- > 0) {
   points.push({
     x: Math.round(Math.random() * (canvas.width - 50) + 25),
@@ -62,7 +62,7 @@ while (totalPoints-- > 0) {
 // }
 // =========================================================
 
-const graph = new Delaunay(points)
+const graph = new PointGraph(points)
 console.log(graph)
 
 /** @type {HTMLElement} */
